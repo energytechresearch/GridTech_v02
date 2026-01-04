@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,96 +56,38 @@ const navigationSections: NavSection[] = [
     title: "Pilot Management",
     icon: Layers,
     items: [
-      { label: "Active Pilots", href: "#active-pilots" },
-      { label: "Pilot Pipeline", href: "#pilot-pipeline" },
-      { label: "Lessons Learned", href: "#lessons-learned" },
+      { label: "Active Pilots", href: "/pilots#active-pilots" },
+      { label: "Pilot Pipeline", href: "/pilots#pilot-pipeline" },
+      { label: "Lessons Learned", href: "/pilots#lessons-learned" },
     ],
   },
   {
     title: "Market Intelligence Hub",
     icon: TrendingUp,
     items: [
-      { label: "Technology Watchlist", href: "#watchlist" },
-      { label: "Vendor Landscape", href: "#vendor-landscape" },
-      { label: "Industry Insights", href: "#industry-insights" },
+      { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
+      { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
+      { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
     ],
   },
 ]
 
 type Technology = {
   id: string
+  tech_id: string
   title: string
   category: string
   tags: string[]
   status: string
   owner: string
-  lastUpdated: string
+  updated_at: string
   description: string
+  type: string
+  grid_layer: string | null
+  benefits: string | null
+  created_at: string
 }
 
-// Placeholder data - will be replaced with Supabase queries
-const technologies: Technology[] = [
-  {
-    id: "NGT-001",
-    title: "Edge Sensor Pilot",
-    category: "Grid Monitoring",
-    tags: ["Hardware", "Sensors", "IoT"],
-    status: "Active",
-    owner: "Grid Ops",
-    lastUpdated: "2026-01-01",
-    description: "Field-deployed edge sensors for feeder reliability analytics and real-time monitoring.",
-  },
-  {
-    id: "NGT-014",
-    title: "AMI Analytics Platform",
-    category: "Data & Analytics",
-    tags: ["Software", "Analytics", "Cloud"],
-    status: "Archived",
-    owner: "Data Strategy",
-    lastUpdated: "2025-11-12",
-    description: "Centralized analytics environment for AMI telemetry and customer insights.",
-  },
-  {
-    id: "NGT-023",
-    title: "Smart Grid Optimization AI",
-    category: "Artificial Intelligence",
-    tags: ["Software", "AI/ML", "Optimization"],
-    status: "Active",
-    owner: "Engineering",
-    lastUpdated: "2025-12-28",
-    description: "Machine learning algorithms for predictive grid load balancing and demand response.",
-  },
-  {
-    id: "NGT-035",
-    title: "EV Charging Management",
-    category: "Electric Vehicles",
-    tags: ["Hardware", "Software", "EV"],
-    status: "Active",
-    owner: "Innovation Team",
-    lastUpdated: "2025-12-15",
-    description: "Integrated platform for managing EV charging infrastructure and demand management.",
-  },
-  {
-    id: "NGT-042",
-    title: "Renewable Integration Platform",
-    category: "Renewable Energy",
-    tags: ["Software", "Solar", "Wind"],
-    status: "Active",
-    owner: "Renewables",
-    lastUpdated: "2025-12-20",
-    description: "Advanced control systems for integrating distributed renewable energy sources.",
-  },
-  {
-    id: "NGT-056",
-    title: "Legacy SCADA System",
-    category: "Control Systems",
-    tags: ["Hardware", "Legacy"],
-    status: "Archived",
-    owner: "IT Operations",
-    lastUpdated: "2025-10-05",
-    description: "Decommissioned supervisory control and data acquisition system replaced by modern solution.",
-  },
-]
 
 export default function LibraryPage() {
   const [expandedSections, setExpandedSections] = useState<string[]>(["Technology Library"])
@@ -152,6 +95,29 @@ export default function LibraryPage() {
   const [activeTab, setActiveTab] = useState<"all" | "archived" | "tags">("all")
   const [search, setSearch] = useState("")
   const [filterTag, setFilterTag] = useState("")
+  const [technologies, setTechnologies] = useState<Technology[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchTechnologies()
+  }, [])
+
+  const fetchTechnologies = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/technologies')
+      if (!response.ok) throw new Error('Failed to fetch technologies')
+      const data = await response.json()
+      setTechnologies(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('Error fetching technologies:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
@@ -170,11 +136,11 @@ export default function LibraryPage() {
 
   // Filter technologies based on active tab and filters
   const filtered = technologies.filter((t) => {
-    const matchesTab = activeTab === "all" ? t.status !== "Archived" : t.status === "Archived"
+    const matchesTab = activeTab === "all" ? t.status === 'active' : t.status === 'archived'
     const matchesSearch =
       !search ||
       t.title.toLowerCase().includes(search.toLowerCase()) ||
-      t.id.toLowerCase().includes(search.toLowerCase()) ||
+      t.tech_id.toLowerCase().includes(search.toLowerCase()) ||
       t.description.toLowerCase().includes(search.toLowerCase())
     const matchesTag = !filterTag || t.tags.includes(filterTag)
     return (activeTab === "tags" ? true : matchesTab) && matchesSearch && matchesTag
@@ -220,20 +186,41 @@ export default function LibraryPage() {
                   {/* Section Items */}
                   {isExpanded && (
                     <div className="ml-6 space-y-1 border-l border-border pl-3">
-                      {section.items.map((item) => (
-                        <button
-                          key={item.href}
-                          onClick={() => handleLinkClick(item.href)}
-                          className={cn(
-                            "block w-full text-left rounded-md px-3 py-2 text-sm transition-colors",
-                            activeLink === item.href
-                              ? "bg-primary/10 text-primary font-medium"
-                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                          )}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
+                      {section.items.map((item) => {
+                        const isExternalLink = item.href.startsWith('/')
+
+                        if (isExternalLink) {
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className={cn(
+                                "block rounded-md px-3 py-2 text-sm transition-colors",
+                                activeLink === item.href
+                                  ? "bg-primary/10 text-primary font-medium"
+                                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                              )}
+                            >
+                              {item.label}
+                            </Link>
+                          )
+                        }
+
+                        return (
+                          <button
+                            key={item.href}
+                            onClick={() => handleLinkClick(item.href)}
+                            className={cn(
+                              "block w-full text-left rounded-md px-3 py-2 text-sm transition-colors",
+                              activeLink === item.href
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                            )}
+                          >
+                            {item.label}
+                          </button>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -308,8 +295,27 @@ export default function LibraryPage() {
             </Button>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <Card className="border-border">
+              <CardContent className="flex items-center justify-center py-12">
+                <p className="text-sm text-muted-foreground">Loading technologies...</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <Card className="border-border">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <p className="text-sm text-destructive mb-4">Error: {error}</p>
+                <Button onClick={fetchTechnologies} variant="outline">Retry</Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Search & Filter Bar - Show for All and Archived tabs */}
-          {activeTab !== "tags" && (
+          {!loading && !error && activeTab !== "tags" && (
             <Card className="border-border mb-6">
               <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row gap-3">
@@ -352,7 +358,7 @@ export default function LibraryPage() {
           )}
 
           {/* All Technologies & Archived Views */}
-          {activeTab !== "tags" && (
+          {!loading && !error && activeTab !== "tags" && (
             <>
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
@@ -376,7 +382,7 @@ export default function LibraryPage() {
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start mb-2">
                           <Badge variant="outline" className="font-mono text-xs">
-                            {tech.id}
+                            {tech.tech_id}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
                             {tech.category}
@@ -397,7 +403,7 @@ export default function LibraryPage() {
 
                         <div className="flex justify-between items-center pt-3 border-t border-border text-xs text-muted-foreground">
                           <span>Owner: {tech.owner}</span>
-                          <span>Updated: {tech.lastUpdated}</span>
+                          <span>Updated: {new Date(tech.updated_at).toLocaleDateString()}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -408,7 +414,7 @@ export default function LibraryPage() {
           )}
 
           {/* Tags & Categories Directory */}
-          {activeTab === "tags" && (
+          {!loading && !error && activeTab === "tags" && (
             <div className="space-y-6">
               <Card className="border-border">
                 <CardHeader>
@@ -501,7 +507,7 @@ export default function LibraryPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-primary">
-                      {technologies.filter((t) => t.status === "Active").length}
+                      {technologies.filter((t) => t.status === 'active').length}
                     </div>
                   </CardContent>
                 </Card>
@@ -512,7 +518,7 @@ export default function LibraryPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-muted-foreground">
-                      {technologies.filter((t) => t.status === "Archived").length}
+                      {technologies.filter((t) => t.status === 'archived').length}
                     </div>
                   </CardContent>
                 </Card>

@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -112,6 +113,11 @@ export default function IntakePage() {
   const [activeLink, setActiveLink] = useState<string>("#submit-request")
   const [activeTab, setActiveTab] = useState<"submit" | "mine" | "queue">("submit")
   const [formData, setFormData] = useState<FormData>(initialFormData)
+  const [mySubmissions, setMySubmissions] = useState<any[]>([])
+  const [reviewQueue, setReviewQueue] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const { toast } = useToast()
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
@@ -130,52 +136,68 @@ export default function IntakePage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Replace with Supabase insert
-    console.log("Submitting new technology request", formData)
-    alert("Request submitted successfully! (Database integration pending)")
-    setFormData(initialFormData)
+    setSubmitting(true)
+
+    try {
+      const response = await fetch('/api/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.ideaTitle,
+          description: formData.description,
+          category: formData.category,
+          type: formData.technologyType,
+          submitter_name: formData.submitterName,
+          submitter_email: formData.submitterEmail,
+          submitter_department: formData.department,
+          grid_layer: formData.gridLayer,
+          benefits: formData.benefits,
+          vendors: formData.vendors,
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to submit')
+
+      toast({
+        title: "Success!",
+        description: "Your technology request has been submitted successfully.",
+      })
+
+      setFormData(initialFormData)
+      fetchSubmissions() // Refresh the data
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit technology request. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  // Mock data - will be replaced with Supabase queries
-  const mySubmissions: Submission[] = []
+  const fetchSubmissions = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/intake')
+      if (!response.ok) throw new Error('Failed to fetch')
+      const data = await response.json()
+      setReviewQueue(data)
+      // Filter user's submissions based on email (you can enhance this with auth)
+      const userEmail = formData.submitterEmail
+      setMySubmissions(data.filter((s: any) => s.submitter_email === userEmail))
+    } catch (error) {
+      console.error('Error fetching submissions:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const reviewQueue: ReviewQueueItem[] = [
-    {
-      idea: "NGT-001",
-      submissionDate: "2026-01-01",
-      submitter: "Jane Doe",
-      department: "Grid Ops",
-      title: "Edge Sensor Pilot",
-      category: "Grid Monitoring",
-      technologyType: "Hardware",
-      status: "In Review",
-      feasibility: "High",
-    },
-    {
-      idea: "NGT-002",
-      submissionDate: "2025-12-28",
-      submitter: "John Smith",
-      department: "Engineering",
-      title: "Smart Meter Analytics Platform",
-      category: "Data Analytics",
-      technologyType: "Software",
-      status: "Pending",
-      feasibility: "Medium",
-    },
-    {
-      idea: "NGT-003",
-      submissionDate: "2025-12-25",
-      submitter: "Sarah Johnson",
-      department: "IT",
-      title: "Grid Optimization AI",
-      category: "Artificial Intelligence",
-      technologyType: "Software",
-      status: "Approved",
-      feasibility: "High",
-    },
-  ]
+  useEffect(() => {
+    fetchSubmissions()
+  }, [])
 
   return (
     <div className="flex h-screen bg-background">
@@ -438,9 +460,9 @@ export default function IntakePage() {
                     >
                       Reset Form
                     </Button>
-                    <Button type="submit" className="gap-2">
+                    <Button type="submit" className="gap-2" disabled={submitting}>
                       <Send className="h-4 w-4" />
-                      Submit Request
+                      {submitting ? 'Submitting...' : 'Submit Request'}
                     </Button>
                   </div>
                 </form>
@@ -489,13 +511,15 @@ export default function IntakePage() {
                       </thead>
                       <tbody>
                         {mySubmissions.map((submission) => (
-                          <tr key={submission.idea} className="border-b border-border hover:bg-muted/50">
-                            <td className="py-3 px-4 text-sm text-foreground">{submission.idea}</td>
+                          <tr key={submission.id} className="border-b border-border hover:bg-muted/50">
+                            <td className="py-3 px-4 text-sm text-foreground">{submission.submission_id}</td>
                             <td className="py-3 px-4 text-sm text-foreground">{submission.title}</td>
                             <td className="py-3 px-4">
                               <Badge variant="outline">{submission.status}</Badge>
                             </td>
-                            <td className="py-3 px-4 text-sm text-muted-foreground">{submission.updated}</td>
+                            <td className="py-3 px-4 text-sm text-muted-foreground">
+                              {new Date(submission.updated_at).toLocaleDateString()}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -539,46 +563,55 @@ export default function IntakePage() {
                     </thead>
                     <tbody>
                       {reviewQueue.map((item) => (
-                        <tr key={item.idea} className="border-b border-border hover:bg-muted/50">
-                          <td className="py-3 px-4 text-sm font-medium text-foreground">{item.idea}</td>
-                          <td className="py-3 px-4 text-sm text-muted-foreground">{item.submissionDate}</td>
-                          <td className="py-3 px-4 text-sm text-foreground">{item.submitter}</td>
-                          <td className="py-3 px-4 text-sm text-muted-foreground">{item.department}</td>
+                        <tr key={item.id} className="border-b border-border hover:bg-muted/50">
+                          <td className="py-3 px-4 text-sm font-medium text-foreground">{item.submission_id}</td>
+                          <td className="py-3 px-4 text-sm text-muted-foreground">
+                            {new Date(item.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-foreground">{item.submitter_name}</td>
+                          <td className="py-3 px-4 text-sm text-muted-foreground">{item.submitter_department}</td>
                           <td className="py-3 px-4 text-sm text-foreground">{item.title}</td>
                           <td className="py-3 px-4 text-sm text-muted-foreground">{item.category}</td>
-                          <td className="py-3 px-4 text-sm text-muted-foreground">{item.technologyType}</td>
+                          <td className="py-3 px-4 text-sm text-muted-foreground">{item.type}</td>
                           <td className="py-3 px-4">
                             <Badge
                               variant="outline"
                               className={cn(
-                                item.status === "Approved" && "bg-accent/10 text-accent border-accent",
-                                item.status === "In Review" && "bg-chart-2/10 text-chart-2 border-chart-2",
-                                item.status === "Pending" && "bg-muted text-muted-foreground",
+                                item.status === "approved" && "bg-accent/10 text-accent border-accent",
+                                item.status === "in-review" && "bg-chart-2/10 text-chart-2 border-chart-2",
+                                item.status === "pending" && "bg-muted text-muted-foreground",
                               )}
                             >
                               {item.status}
                             </Badge>
                           </td>
                           <td className="py-3 px-4">
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                item.feasibility === "High" && "bg-accent/10 text-accent border-accent",
-                                item.feasibility === "Medium" && "bg-chart-2/10 text-chart-2 border-chart-2",
-                                item.feasibility === "Low" && "bg-destructive/10 text-destructive border-destructive",
-                              )}
-                            >
-                              {item.feasibility}
-                            </Badge>
+                            {item.feasibility_score ? (
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  item.feasibility_score >= 75 && "bg-accent/10 text-accent border-accent",
+                                  item.feasibility_score >= 50 && item.feasibility_score < 75 && "bg-chart-2/10 text-chart-2 border-chart-2",
+                                  item.feasibility_score < 50 && "bg-destructive/10 text-destructive border-destructive",
+                                )}
+                              >
+                                {item.feasibility_score}%
+                              </Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">N/A</span>
+                            )}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <p className="text-xs text-muted-foreground mt-4">
-                  Queue columns align with your schema. Database integration pending.
-                </p>
+                {loading && (
+                  <p className="text-xs text-muted-foreground mt-4">Loading submissions...</p>
+                )}
+                {!loading && reviewQueue.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-4">No submissions in review queue.</p>
+                )}
               </CardContent>
             </Card>
           )}

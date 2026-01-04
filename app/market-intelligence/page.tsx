@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   ChevronDown,
   ChevronRight,
@@ -77,154 +77,88 @@ const navigationSections: NavSection[] = [
 
 type WatchlistItem = {
   id: string
+  watchlist_id: string
   technology: string
   vendor: string
   signal: string
   priority: string
   notes: string
-  lastUpdated: string
+  updated_at: string
+  created_at: string
 }
 
 type Vendor = {
   id: string
+  vendor_id: string
   name: string
   focus: string
   maturity: string
   region: string
-  activePilots: number
-  relatedTech: string[]
+  active_pilots: number
+  related_technologies: string[]
+  created_at: string
+  updated_at: string
 }
 
 type Insight = {
   id: string
+  insight_id: string
   title: string
   source: string
   date: string
   summary: string
-  link: string
+  url: string
+  created_at: string
+  updated_at: string
 }
 
-// Placeholder data - will be replaced with Supabase queries
-const watchlist: WatchlistItem[] = [
-  {
-    id: "MI-001",
-    technology: "Advanced Fault Location",
-    vendor: "GridSense Labs",
-    signal: "Emerging",
-    priority: "High",
-    notes: "Growing utility adoption in distribution automation pilots.",
-    lastUpdated: "2025-12-18",
-  },
-  {
-    id: "MI-007",
-    technology: "Hydrogen Blending Sensors",
-    vendor: "EnerTech Instruments",
-    signal: "Monitoring",
-    priority: "Medium",
-    notes: "OEM partnerships under evaluation.",
-    lastUpdated: "2025-10-02",
-  },
-  {
-    id: "MI-012",
-    technology: "AI-Powered Grid Analytics",
-    vendor: "SmartGrid AI Corp",
-    signal: "Mature",
-    priority: "High",
-    notes: "Multiple successful deployments across North America. Proven ROI.",
-    lastUpdated: "2025-11-30",
-  },
-  {
-    id: "MI-015",
-    technology: "Dynamic Load Management",
-    vendor: "PowerFlow Systems",
-    signal: "Emerging",
-    priority: "Medium",
-    notes: "Field trials showing promising demand response capabilities.",
-    lastUpdated: "2025-12-01",
-  },
-]
-
-const vendors: Vendor[] = [
-  {
-    id: "V-102",
-    name: "GridSense Labs",
-    focus: "Grid Monitoring & Edge Analytics",
-    maturity: "Growth",
-    region: "North America",
-    activePilots: 2,
-    relatedTech: ["Edge Sensors", "Fault Detection"],
-  },
-  {
-    id: "V-221",
-    name: "EnerTech Instruments",
-    focus: "Gas Infrastructure & Pipeline Sensors",
-    maturity: "Early",
-    region: "Europe",
-    activePilots: 0,
-    relatedTech: ["Hydrogen", "Instrumentation"],
-  },
-  {
-    id: "V-305",
-    name: "SmartGrid AI Corp",
-    focus: "Machine Learning for Grid Operations",
-    maturity: "Mature",
-    region: "Global",
-    activePilots: 3,
-    relatedTech: ["AI/ML", "Predictive Analytics", "Optimization"],
-  },
-  {
-    id: "V-412",
-    name: "PowerFlow Systems",
-    focus: "Demand Response & Load Control",
-    maturity: "Growth",
-    region: "North America",
-    activePilots: 1,
-    relatedTech: ["Load Management", "DR Programs"],
-  },
-]
-
-const insights: Insight[] = [
-  {
-    id: "INS-301",
-    title: "Utility Investment Trends in Grid Automation (2026 Outlook)",
-    source: "Analyst Briefing",
-    date: "2025-11-20",
-    summary: "Capital flows shifting toward DER visibility, feeder automation, and substation analytics platforms.",
-    link: "#",
-  },
-  {
-    id: "INS-314",
-    title: "Cybersecurity Considerations for AMI Modernization Programs",
-    source: "Industry Report",
-    date: "2025-09-14",
-    summary: "Vendors increasingly embedding zero-trust patterns and secure telemetry pipelines into AMI stacks.",
-    link: "#",
-  },
-  {
-    id: "INS-320",
-    title: "Renewable Integration Challenges in 2025: Lessons from Early Adopters",
-    source: "Conference Presentation",
-    date: "2025-10-08",
-    summary:
-      "Utilities face balancing challenges with high solar penetration. Energy storage and forecasting tools are critical enablers.",
-    link: "#",
-  },
-  {
-    id: "INS-328",
-    title: "Emerging Hydrogen Infrastructure Standards",
-    source: "Standards Body Update",
-    date: "2025-12-15",
-    summary:
-      "New guidelines published for hydrogen blending in natural gas pipelines. Safety and measurement protocols defined.",
-    link: "#",
-  },
-]
 
 export default function MarketIntelligencePage() {
   const [expandedSections, setExpandedSections] = useState<string[]>(["Market Intelligence Hub"])
   const [activeLink, setActiveLink] = useState<string>("#watchlist")
   const [activeTab, setActiveTab] = useState<"watchlist" | "vendors" | "insights">("watchlist")
   const [search, setSearch] = useState("")
+
+  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([])
+  const [vendors, setVendors] = useState<Vendor[]>([])
+  const [insights, setInsights] = useState<Insight[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchMarketData()
+  }, [])
+
+  const fetchMarketData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [watchlistRes, vendorsRes, insightsRes] = await Promise.all([
+        fetch('/api/market/watchlist'),
+        fetch('/api/market/vendors'),
+        fetch('/api/market/insights')
+      ])
+
+      if (!watchlistRes.ok || !vendorsRes.ok || !insightsRes.ok) {
+        throw new Error('Failed to fetch market data')
+      }
+
+      const [watchlistData, vendorsData, insightsData] = await Promise.all([
+        watchlistRes.json(),
+        vendorsRes.json(),
+        insightsRes.json()
+      ])
+
+      setWatchlist(watchlistData)
+      setVendors(vendorsData)
+      setInsights(insightsData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('Error fetching market data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
@@ -439,14 +373,32 @@ export default function MarketIntelligencePage() {
           {/* Technology Watchlist Tab */}
           {activeTab === "watchlist" && (
             <>
-              {filteredWatchlist.length > 0 ? (
+              {loading ? (
+                <Card className="border-border">
+                  <CardContent className="flex items-center justify-center py-12">
+                    <p className="text-sm text-muted-foreground">Loading watchlist...</p>
+                  </CardContent>
+                </Card>
+              ) : error ? (
+                <Card className="border-border">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <p className="text-sm text-destructive mb-2">Error: {error}</p>
+                    <button
+                      onClick={fetchMarketData}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Try again
+                    </button>
+                  </CardContent>
+                </Card>
+              ) : filteredWatchlist.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredWatchlist.map((item) => (
                     <Card key={item.id} className="border-border hover:shadow-lg transition-shadow">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between mb-2">
                           <Badge variant="outline" className="text-xs">
-                            {item.id}
+                            {item.watchlist_id}
                           </Badge>
                           <Badge variant="outline" className={cn("text-xs border", getSignalColor(item.signal))}>
                             {item.signal}
@@ -468,7 +420,7 @@ export default function MarketIntelligencePage() {
                           </Badge>
                           <div className="flex items-center gap-1 text-muted-foreground">
                             <Calendar className="h-3 w-3" />
-                            <span>{item.lastUpdated}</span>
+                            <span>{new Date(item.updated_at).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -496,14 +448,32 @@ export default function MarketIntelligencePage() {
           {/* Vendor Landscape Tab */}
           {activeTab === "vendors" && (
             <>
-              {filteredVendors.length > 0 ? (
+              {loading ? (
+                <Card className="border-border">
+                  <CardContent className="flex items-center justify-center py-12">
+                    <p className="text-sm text-muted-foreground">Loading vendors...</p>
+                  </CardContent>
+                </Card>
+              ) : error ? (
+                <Card className="border-border">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <p className="text-sm text-destructive mb-2">Error: {error}</p>
+                    <button
+                      onClick={fetchMarketData}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Try again
+                    </button>
+                  </CardContent>
+                </Card>
+              ) : filteredVendors.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredVendors.map((vendor) => (
                     <Card key={vendor.id} className="border-border hover:shadow-lg transition-shadow">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between mb-2">
                           <Badge variant="outline" className="text-xs">
-                            {vendor.id}
+                            {vendor.vendor_id}
                           </Badge>
                           <Badge variant="outline" className={cn("text-xs border", getMaturityColor(vendor.maturity))}>
                             {vendor.maturity}
@@ -520,7 +490,7 @@ export default function MarketIntelligencePage() {
                         <div className="pt-2 border-t border-border">
                           <p className="text-xs font-medium mb-2">Related Technologies:</p>
                           <div className="flex flex-wrap gap-2">
-                            {vendor.relatedTech.map((tech) => (
+                            {vendor.related_technologies.map((tech) => (
                               <Badge key={tech} variant="secondary" className="text-xs">
                                 {tech}
                               </Badge>
@@ -529,7 +499,7 @@ export default function MarketIntelligencePage() {
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground pt-2 border-t border-border">
                           <Target className="h-3 w-3" />
-                          <span>Active Pilots: {vendor.activePilots}</span>
+                          <span>Active Pilots: {vendor.active_pilots}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -556,14 +526,32 @@ export default function MarketIntelligencePage() {
           {/* Industry Insights Tab */}
           {activeTab === "insights" && (
             <>
-              {filteredInsights.length > 0 ? (
+              {loading ? (
+                <Card className="border-border">
+                  <CardContent className="flex items-center justify-center py-12">
+                    <p className="text-sm text-muted-foreground">Loading insights...</p>
+                  </CardContent>
+                </Card>
+              ) : error ? (
+                <Card className="border-border">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <p className="text-sm text-destructive mb-2">Error: {error}</p>
+                    <button
+                      onClick={fetchMarketData}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Try again
+                    </button>
+                  </CardContent>
+                </Card>
+              ) : filteredInsights.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredInsights.map((insight) => (
                     <Card key={insight.id} className="border-border hover:shadow-lg transition-shadow">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between mb-2">
                           <Badge variant="outline" className="text-xs">
-                            {insight.id}
+                            {insight.insight_id}
                           </Badge>
                           <Badge variant="outline" className="text-xs bg-muted">
                             {insight.source}
@@ -572,7 +560,7 @@ export default function MarketIntelligencePage() {
                         <CardTitle className="text-lg leading-tight">{insight.title}</CardTitle>
                         <CardDescription className="flex items-center gap-1 text-xs">
                           <Calendar className="h-3 w-3" />
-                          {insight.date}
+                          {new Date(insight.date).toLocaleDateString()}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
@@ -580,7 +568,7 @@ export default function MarketIntelligencePage() {
                           <p className="text-xs text-muted-foreground leading-relaxed">{insight.summary}</p>
                         </div>
                         <a
-                          href={insight.link}
+                          href={insight.url}
                           className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                         >
                           View source

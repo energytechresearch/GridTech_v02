@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BarChart3, FileText, TrendingUp, Layers } from "lucide-react"
@@ -35,12 +36,16 @@ export default function LandingPage() {
             </a>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm">
-              Log In
-            </Button>
-            <Button variant="default" size="sm">
-              Sign Up
-            </Button>
+            <Link href="/login">
+              <Button variant="ghost" size="sm">
+                Log In
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button variant="default" size="sm">
+                Sign Up
+              </Button>
+            </Link>
           </div>
         </nav>
       </header>

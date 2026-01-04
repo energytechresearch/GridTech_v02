@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import {
   ChevronDown,
   ChevronRight,
@@ -68,116 +69,60 @@ const navigationSections: NavSection[] = [
     title: "Market Intelligence Hub",
     icon: TrendingUp,
     items: [
-      { label: "Technology Watchlist", href: "#watchlist" },
-      { label: "Vendor Landscape", href: "#vendor-landscape" },
-      { label: "Industry Insights", href: "#industry-insights" },
+      { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
+      { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
+      { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
     ],
   },
 ]
 
 type Pilot = {
   id: string
-  technologyId: string
+  pilot_id: string
+  technology_id: string | null
   title: string
   phase: string
   status: string
   sponsor: string
-  startDate: string
-  endDate: string
+  start_date: string | null
+  end_date: string | null
   location: string
   objectives: string
-  lessons: string
+  progress: number
+  lessons_learned: string | null
+  created_at: string
+  updated_at: string
 }
 
-// Placeholder data - will be replaced with Supabase queries
-const pilots: Pilot[] = [
-  {
-    id: "PILOT-101",
-    technologyId: "NGT-001",
-    title: "Edge Sensor Field Deployment",
-    phase: "Execution",
-    status: "Active",
-    sponsor: "Grid Operations",
-    startDate: "2025-10-15",
-    endDate: "2026-03-20",
-    location: "Feeder Zone A",
-    objectives: "Improve outage detection speed and fault localization.",
-    lessons: "Initial calibration required site-specific tuning.",
-  },
-  {
-    id: "PILOT-102",
-    technologyId: "NGT-003",
-    title: "Advanced Metering Analytics",
-    phase: "Planning",
-    status: "Pipeline",
-    sponsor: "Data Strategy",
-    startDate: "2026-01-15",
-    endDate: "2026-06-30",
-    location: "District 5",
-    objectives: "Evaluate predictive maintenance capabilities using meter data patterns.",
-    lessons: "",
-  },
-  {
-    id: "PILOT-103",
-    technologyId: "NGT-007",
-    title: "Grid Storage Integration Test",
-    phase: "Execution",
-    status: "Active",
-    sponsor: "Innovation Team",
-    startDate: "2025-08-01",
-    endDate: "2026-01-31",
-    location: "Substation 12",
-    objectives: "Test battery storage integration with existing grid infrastructure.",
-    lessons: "Weather conditions significantly impact performance metrics.",
-  },
-  {
-    id: "PILOT-204",
-    technologyId: "NGT-014",
-    title: "AMI Analytics Insights Trial",
-    phase: "Completed",
-    status: "Completed",
-    sponsor: "Data Strategy",
-    startDate: "2025-04-01",
-    endDate: "2025-09-10",
-    location: "Systemwide",
-    objectives: "Evaluate anomaly detection for meter events.",
-    lessons:
-      "Value dependent on upstream data quality controls. Recommend establishing data governance framework before scaling.",
-  },
-  {
-    id: "PILOT-205",
-    technologyId: "NGT-009",
-    title: "Smart Grid Communication Protocol",
-    phase: "Initiation",
-    status: "Pipeline",
-    sponsor: "Engineering",
-    startDate: "2026-02-01",
-    endDate: "2026-08-15",
-    location: "Test Lab",
-    objectives: "Validate new communication protocols for grid devices.",
-    lessons: "",
-  },
-  {
-    id: "PILOT-206",
-    technologyId: "NGT-012",
-    title: "Renewable Integration Study",
-    phase: "Completed",
-    status: "Completed",
-    sponsor: "Renewables Team",
-    startDate: "2024-11-01",
-    endDate: "2025-05-30",
-    location: "Solar Farm A",
-    objectives: "Assess grid stability with increased solar penetration.",
-    lessons:
-      "Forecasting accuracy improved with machine learning models. Need better tools for real-time grid balancing.",
-  },
-]
 
 export default function PilotsPage() {
   const [expandedSections, setExpandedSections] = useState<string[]>(["Pilot Management"])
   const [activeLink, setActiveLink] = useState<string>("#active-pilots")
   const [activeTab, setActiveTab] = useState<"active" | "pipeline" | "lessons">("active")
   const [search, setSearch] = useState("")
+  const [pilots, setPilots] = useState<Pilot[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchPilots()
+  }, [])
+
+  const fetchPilots = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/pilots')
+      if (!response.ok) throw new Error('Failed to fetch pilots')
+      const data = await response.json()
+      setPilots(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('Error fetching pilots:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
@@ -196,25 +141,25 @@ export default function PilotsPage() {
     const matchesSearch =
       !search ||
       p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.id.toLowerCase().includes(search.toLowerCase()) ||
-      p.technologyId.toLowerCase().includes(search.toLowerCase()) ||
+      p.pilot_id.toLowerCase().includes(search.toLowerCase()) ||
+      (p.technology_id && p.technology_id.toLowerCase().includes(search.toLowerCase())) ||
       p.sponsor.toLowerCase().includes(search.toLowerCase())
 
-    if (activeTab === "active") return p.status === "Active" && matchesSearch
-    if (activeTab === "pipeline") return p.status === "Pipeline" && matchesSearch
-    if (activeTab === "lessons") return p.lessons && p.lessons.length > 0 && matchesSearch
+    if (activeTab === "active") return p.status === "active" && matchesSearch
+    if (activeTab === "pipeline") return p.status === "pipeline" && matchesSearch
+    if (activeTab === "lessons") return p.lessons_learned && p.lessons_learned.length > 0 && matchesSearch
     return matchesSearch
   })
 
   const getPhaseColor = (phase: string) => {
-    switch (phase) {
-      case "Execution":
+    switch (phase.toLowerCase()) {
+      case "execution":
         return "bg-primary/10 text-primary border-primary/20"
-      case "Planning":
+      case "planning":
         return "bg-blue-500/10 text-blue-600 border-blue-500/20"
-      case "Initiation":
+      case "initiation":
         return "bg-amber-500/10 text-amber-600 border-amber-500/20"
-      case "Completed":
+      case "completed":
         return "bg-green-500/10 text-green-600 border-green-500/20"
       default:
         return "bg-muted text-muted-foreground border-border"
@@ -261,20 +206,41 @@ export default function PilotsPage() {
                   {/* Section Items */}
                   {isExpanded && (
                     <div className="ml-6 space-y-1 border-l border-border pl-3">
-                      {section.items.map((item) => (
-                        <button
-                          key={item.href}
-                          onClick={() => handleLinkClick(item.href)}
-                          className={cn(
-                            "block w-full text-left rounded-md px-3 py-2 text-sm transition-colors",
-                            activeLink === item.href
-                              ? "bg-primary/10 text-primary font-medium"
-                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                          )}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
+                      {section.items.map((item) => {
+                        const isExternalLink = item.href.startsWith('/')
+
+                        if (isExternalLink) {
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className={cn(
+                                "block rounded-md px-3 py-2 text-sm transition-colors",
+                                activeLink === item.href
+                                  ? "bg-primary/10 text-primary font-medium"
+                                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                              )}
+                            >
+                              {item.label}
+                            </Link>
+                          )
+                        }
+
+                        return (
+                          <button
+                            key={item.href}
+                            onClick={() => handleLinkClick(item.href)}
+                            className={cn(
+                              "block w-full text-left rounded-md px-3 py-2 text-sm transition-colors",
+                              activeLink === item.href
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                            )}
+                          >
+                            {item.label}
+                          </button>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -365,23 +331,41 @@ export default function PilotsPage() {
           </Card>
 
           {/* Pilots Grid */}
-          {filtered.length > 0 ? (
+          {loading ? (
+            <Card className="border-border">
+              <CardContent className="flex items-center justify-center py-12">
+                <p className="text-sm text-muted-foreground">Loading pilots...</p>
+              </CardContent>
+            </Card>
+          ) : error ? (
+            <Card className="border-border">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <p className="text-sm text-destructive mb-2">Error: {error}</p>
+                <button
+                  onClick={fetchPilots}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Try again
+                </button>
+              </CardContent>
+            </Card>
+          ) : filtered.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((pilot) => (
                 <Card key={pilot.id} className="border-border hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between mb-2">
                       <Badge variant="outline" className="text-xs">
-                        {pilot.id}
+                        {pilot.pilot_id}
                       </Badge>
                       <Badge variant="outline" className={cn("text-xs border", getPhaseColor(pilot.phase))}>
-                        {pilot.phase}
+                        {pilot.phase.charAt(0).toUpperCase() + pilot.phase.slice(1)}
                       </Badge>
                     </div>
                     <CardTitle className="text-lg leading-tight">{pilot.title}</CardTitle>
                     <CardDescription className="flex items-center gap-1 text-xs">
                       <Database className="h-3 w-3" />
-                      Technology: {pilot.technologyId}
+                      Technology: {pilot.technology_id || 'N/A'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -397,27 +381,44 @@ export default function PilotsPage() {
                       <div className="flex items-center gap-1 text-muted-foreground col-span-2">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {pilot.startDate} → {pilot.endDate}
+                          {pilot.start_date ? new Date(pilot.start_date).toLocaleDateString() : 'TBD'} → {pilot.end_date ? new Date(pilot.end_date).toLocaleDateString() : 'TBD'}
                         </span>
                       </div>
                     </div>
 
                     {activeTab !== "lessons" && (
-                      <div className="pt-2 border-t border-border">
-                        <div className="flex items-start gap-1">
-                          <Target className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
-                          <p className="text-xs text-muted-foreground leading-relaxed">{pilot.objectives}</p>
+                      <>
+                        <div className="pt-2 border-t border-border">
+                          <div className="flex items-start gap-1">
+                            <Target className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                            <p className="text-xs text-muted-foreground leading-relaxed">{pilot.objectives}</p>
+                          </div>
                         </div>
-                      </div>
+
+                        {pilot.progress !== undefined && pilot.progress !== null && (
+                          <div className="pt-2 border-t border-border">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium">Progress</span>
+                              <span className="text-xs text-muted-foreground">{pilot.progress}%</span>
+                            </div>
+                            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary rounded-full transition-all"
+                                style={{ width: `${pilot.progress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
 
-                    {activeTab === "lessons" && pilot.lessons && (
+                    {activeTab === "lessons" && pilot.lessons_learned && (
                       <div className="pt-2 border-t border-border">
                         <h4 className="text-xs font-semibold mb-1 flex items-center gap-1">
                           <Lightbulb className="h-3 w-3 text-primary" />
                           Lessons Learned
                         </h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{pilot.lessons}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{pilot.lessons_learned}</p>
                       </div>
                     )}
                   </CardContent>

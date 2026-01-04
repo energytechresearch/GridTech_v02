@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -36,43 +37,117 @@ const navigationSections: NavSection[] = [
     title: "Technology Intake Portal",
     icon: FileText,
     items: [
-      { label: "Submit New Technology Request", href: "#submit-request" },
-      { label: "My Submissions", href: "#my-submissions" },
-      { label: "Intake Review Queue", href: "#review-queue" },
+      { label: "Submit New Technology Request", href: "/intake#submit-request" },
+      { label: "My Submissions", href: "/intake#my-submissions" },
+      { label: "Intake Review Queue", href: "/intake#review-queue" },
     ],
   },
   {
     title: "Technology Library",
     icon: Database,
     items: [
-      { label: "All Technologies", href: "#all-technologies" },
-      { label: "Archived / Evaluated Technologies", href: "#archived-technologies" },
-      { label: "Tags & Categories", href: "#tags-categories" },
+      { label: "All Technologies", href: "/library#all-technologies" },
+      { label: "Archived / Evaluated Technologies", href: "/library#archived-technologies" },
+      { label: "Tags & Categories", href: "/library#tags-categories" },
     ],
   },
   {
     title: "Pilot Management",
     icon: Layers,
     items: [
-      { label: "Active Pilots", href: "#active-pilots" },
-      { label: "Pilot Pipeline", href: "#pilot-pipeline" },
-      { label: "Lessons Learned", href: "#lessons-learned" },
+      { label: "Active Pilots", href: "/pilots#active-pilots" },
+      { label: "Pilot Pipeline", href: "/pilots#pilot-pipeline" },
+      { label: "Lessons Learned", href: "/pilots#lessons-learned" },
     ],
   },
   {
     title: "Market Intelligence Hub",
     icon: TrendingUp,
     items: [
-      { label: "Technology Watchlist", href: "#watchlist" },
-      { label: "Vendor Landscape", href: "#vendor-landscape" },
-      { label: "Industry Insights", href: "#industry-insights" },
+      { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
+      { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
+      { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
     ],
   },
 ]
 
+type DashboardStats = {
+  activeProjects: number
+  completed: number
+  pendingReview: number
+  atRisk: number
+}
+
+type Submission = {
+  id: string
+  submission_id: string
+  technology_name: string
+  status: string
+  created_at: string
+  updated_at: string
+}
+
+type Pilot = {
+  id: string
+  pilot_id: string
+  title: string
+  progress: number
+  sponsor: string
+  status: string
+}
+
 export default function DashboardPage() {
   const [expandedSections, setExpandedSections] = useState<string[]>(["Technology Intake Portal"])
   const [activeLink, setActiveLink] = useState<string>("")
+
+  const [stats, setStats] = useState<DashboardStats>({
+    activeProjects: 0,
+    completed: 0,
+    pendingReview: 0,
+    atRisk: 0
+  })
+  const [recentSubmissions, setRecentSubmissions] = useState<Submission[]>([])
+  const [activePilots, setActivePilots] = useState<Pilot[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [statsRes, submissionsRes, pilotsRes] = await Promise.all([
+        fetch('/api/dashboard/stats'),
+        fetch('/api/intake'),
+        fetch('/api/pilots')
+      ])
+
+      if (!statsRes.ok || !submissionsRes.ok || !pilotsRes.ok) {
+        throw new Error('Failed to fetch dashboard data')
+      }
+
+      const [statsData, submissionsData, pilotsData] = await Promise.all([
+        statsRes.json(),
+        submissionsRes.json(),
+        pilotsRes.json()
+      ])
+
+      setStats(statsData)
+      // Get latest 3 submissions
+      setRecentSubmissions(submissionsData.slice(0, 3))
+      // Get latest 3 active pilots
+      const activeOnly = pilotsData.filter((p: Pilot) => p.status === 'active').slice(0, 3)
+      setActivePilots(activeOnly)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('Error fetching dashboard data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
@@ -123,13 +198,10 @@ export default function DashboardPage() {
                   {isExpanded && (
                     <div className="ml-6 space-y-1 border-l border-border pl-3">
                       {section.items.map((item) => (
-                        <a
+                        <Link
                           key={item.href}
                           href={item.href}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleLinkClick(item.href)
-                          }}
+                          onClick={() => handleLinkClick(item.href)}
                           className={cn(
                             "block rounded-md px-3 py-2 text-sm transition-colors",
                             activeLink === item.href
@@ -138,7 +210,7 @@ export default function DashboardPage() {
                           )}
                         >
                           {item.label}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -175,123 +247,147 @@ export default function DashboardPage() {
         {/* Dashboard Content */}
         <div className="p-8">
           {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-            <Card className="border-border">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Active Projects</CardTitle>
-                <BarChart3 className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">42</div>
-                <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
+          {loading ? (
+            <Card className="border-border mb-8">
+              <CardContent className="flex items-center justify-center py-12">
+                <p className="text-sm text-muted-foreground">Loading dashboard...</p>
               </CardContent>
             </Card>
+          ) : error ? (
+            <Card className="border-border mb-8">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <p className="text-sm text-destructive mb-2">Error: {error}</p>
+                <button
+                  onClick={fetchDashboardData}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Try again
+                </button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+              <Card className="border-border">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Active Projects</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.activeProjects}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Currently in execution</p>
+                </CardContent>
+              </Card>
 
-            <Card className="border-border">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-accent" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">18</div>
-                <p className="text-xs text-muted-foreground mt-1">+3 this quarter</p>
-              </CardContent>
-            </Card>
+              <Card className="border-border">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+                  <CheckCircle2 className="h-4 w-4 text-accent" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.completed}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Successfully finished</p>
+                </CardContent>
+              </Card>
 
-            <Card className="border-border">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
-                <Clock className="h-4 w-4 text-chart-2" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">7</div>
-                <p className="text-xs text-muted-foreground mt-1">2 urgent items</p>
-              </CardContent>
-            </Card>
+              <Card className="border-border">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
+                  <Clock className="h-4 w-4 text-chart-2" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.pendingReview}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Awaiting evaluation</p>
+                </CardContent>
+              </Card>
 
-            <Card className="border-border">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">At Risk</CardTitle>
-                <AlertCircle className="h-4 w-4 text-destructive" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">3</div>
-                <p className="text-xs text-muted-foreground mt-1">Requires attention</p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card className="border-border">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">At Risk</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-destructive" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.atRisk}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Requires attention</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Portfolio Overview Cards */}
-          <div className="grid gap-6 md:grid-cols-2 mb-8">
-            <Card className="border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground">Recent Submissions</CardTitle>
-                <CardDescription>Latest technology intake requests</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { name: "Advanced Metering Infrastructure", date: "2 hours ago", status: "Under Review" },
-                    { name: "Grid Energy Storage System", date: "1 day ago", status: "Approved" },
-                    { name: "Smart Grid Analytics Platform", date: "3 days ago", status: "Pending" },
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between pb-4 border-b border-border last:border-0 last:pb-0"
-                    >
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-foreground">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">{item.date}</p>
-                      </div>
-                      <span
-                        className={cn(
-                          "text-xs font-medium px-2.5 py-0.5 rounded-full",
-                          item.status === "Approved" && "bg-accent/10 text-accent",
-                          item.status === "Under Review" && "bg-chart-2/10 text-chart-2",
-                          item.status === "Pending" && "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground">Active Pilots</CardTitle>
-                <CardDescription>Currently running pilot programs</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { name: "EV Charging Infrastructure Pilot", progress: 75, team: "8 members" },
-                    { name: "Microgrid Control System", progress: 45, team: "5 members" },
-                    { name: "Renewable Integration Platform", progress: 90, team: "12 members" },
-                  ].map((item, idx) => (
-                    <div key={idx} className="pb-4 border-b border-border last:border-0 last:pb-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm font-medium text-foreground">{item.name}</p>
-                        <span className="text-xs text-muted-foreground">{item.progress}%</span>
-                      </div>
-                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-2">
+          {!loading && !error && (
+            <div className="grid gap-6 md:grid-cols-2 mb-8">
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Recent Submissions</CardTitle>
+                  <CardDescription>Latest technology intake requests</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {recentSubmissions.length > 0 ? (
+                    <div className="space-y-4">
+                      {recentSubmissions.map((item) => (
                         <div
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${item.progress}%` }}
-                        />
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Users className="h-3 w-3" />
-                        <span>{item.team}</span>
-                      </div>
+                          key={item.id}
+                          className="flex items-center justify-between pb-4 border-b border-border last:border-0 last:pb-0"
+                        >
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground">{item.technology_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <span
+                            className={cn(
+                              "text-xs font-medium px-2.5 py-0.5 rounded-full capitalize",
+                              item.status === "approved" && "bg-accent/10 text-accent",
+                              item.status === "in-review" && "bg-chart-2/10 text-chart-2",
+                              item.status === "pending" && "bg-muted text-muted-foreground",
+                            )}
+                          >
+                            {item.status.replace('-', ' ')}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No recent submissions</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Active Pilots</CardTitle>
+                  <CardDescription>Currently running pilot programs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {activePilots.length > 0 ? (
+                    <div className="space-y-4">
+                      {activePilots.map((pilot) => (
+                        <div key={pilot.id} className="pb-4 border-b border-border last:border-0 last:pb-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm font-medium text-foreground">{pilot.title}</p>
+                            <span className="text-xs text-muted-foreground">{pilot.progress}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-2">
+                            <div
+                              className="h-full bg-primary rounded-full transition-all"
+                              style={{ width: `${pilot.progress}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Users className="h-3 w-3" />
+                            <span>Sponsor: {pilot.sponsor}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No active pilots</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Quick Actions */}
           <Card className="border-border">
