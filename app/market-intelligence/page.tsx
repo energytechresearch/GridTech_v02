@@ -24,6 +24,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { useUser } from "@/lib/auth/hooks"
 
 type NavItem = {
   label: string
@@ -68,9 +69,9 @@ const navigationSections: NavSection[] = [
     title: "Market Intelligence Hub",
     icon: TrendingUp,
     items: [
-      { label: "Technology Watchlist", href: "#watchlist" },
-      { label: "Vendor Landscape", href: "#vendor-landscape" },
-      { label: "Industry Insights", href: "#industry-insights" },
+      { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
+      { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
+      { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
     ],
   },
 ]
@@ -114,8 +115,9 @@ type Insight = {
 
 
 export default function MarketIntelligencePage() {
+  const { user } = useUser()
   const [expandedSections, setExpandedSections] = useState<string[]>(["Market Intelligence Hub"])
-  const [activeLink, setActiveLink] = useState<string>("#watchlist")
+  const [activeLink, setActiveLink] = useState<string>("/market-intelligence#watchlist")
   const [activeTab, setActiveTab] = useState<"watchlist" | "vendors" | "insights">("watchlist")
   const [search, setSearch] = useState("")
 
@@ -124,6 +126,16 @@ export default function MarketIntelligencePage() {
   const [insights, setInsights] = useState<Insight[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Get user initials
+  const getUserInitials = (name: string | undefined) => {
+    if (!name) return "U"
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+  }
 
   useEffect(() => {
     fetchMarketData()
@@ -167,9 +179,9 @@ export default function MarketIntelligencePage() {
   const handleLinkClick = (href: string) => {
     setActiveLink(href)
     // Map href to tab
-    if (href === "#watchlist") setActiveTab("watchlist")
-    else if (href === "#vendor-landscape") setActiveTab("vendors")
-    else if (href === "#industry-insights") setActiveTab("insights")
+    if (href === "/market-intelligence#watchlist") setActiveTab("watchlist")
+    else if (href === "/market-intelligence#vendor-landscape") setActiveTab("vendors")
+    else if (href === "/market-intelligence#industry-insights") setActiveTab("insights")
   }
 
   // Filter data based on active tab and search
@@ -293,11 +305,15 @@ export default function MarketIntelligencePage() {
         <div className="border-t border-border p-4">
           <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              JD
+              {getUserInitials(user?.user_metadata?.full_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground truncate">John Doe</div>
-              <div className="text-xs text-muted-foreground">PMO Manager</div>
+              <div className="text-sm font-medium text-foreground truncate">
+                {user?.user_metadata?.full_name || user?.email || "User"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user?.user_metadata?.department || "Team Member"}
+              </div>
             </div>
           </div>
         </div>
@@ -323,7 +339,7 @@ export default function MarketIntelligencePage() {
             <Button
               onClick={() => {
                 setActiveTab("watchlist")
-                setActiveLink("#watchlist")
+                setActiveLink("/market-intelligence#watchlist")
               }}
               variant={activeTab === "watchlist" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "watchlist" && "bg-card hover:bg-muted")}
@@ -334,7 +350,7 @@ export default function MarketIntelligencePage() {
             <Button
               onClick={() => {
                 setActiveTab("vendors")
-                setActiveLink("#vendor-landscape")
+                setActiveLink("/market-intelligence#vendor-landscape")
               }}
               variant={activeTab === "vendors" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "vendors" && "bg-card hover:bg-muted")}
@@ -345,7 +361,7 @@ export default function MarketIntelligencePage() {
             <Button
               onClick={() => {
                 setActiveTab("insights")
-                setActiveLink("#industry-insights")
+                setActiveLink("/market-intelligence#industry-insights")
               }}
               variant={activeTab === "insights" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "insights" && "bg-card hover:bg-muted")}

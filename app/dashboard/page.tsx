@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useUser } from "@/lib/auth/hooks"
 
 type NavItem = {
   label: string
@@ -97,6 +98,7 @@ type Pilot = {
 }
 
 export default function DashboardPage() {
+  const { user } = useUser()
   const [expandedSections, setExpandedSections] = useState<string[]>(["Technology Intake Portal"])
   const [activeLink, setActiveLink] = useState<string>("")
 
@@ -110,6 +112,16 @@ export default function DashboardPage() {
   const [activePilots, setActivePilots] = useState<Pilot[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Get user initials
+  const getUserInitials = (name: string | undefined) => {
+    if (!name) return "U"
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+  }
 
   useEffect(() => {
     fetchDashboardData()
@@ -224,11 +236,15 @@ export default function DashboardPage() {
         <div className="border-t border-border p-4">
           <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              JD
+              {getUserInitials(user?.user_metadata?.full_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground truncate">John Doe</div>
-              <div className="text-xs text-muted-foreground">PMO Manager</div>
+              <div className="text-sm font-medium text-foreground truncate">
+                {user?.user_metadata?.full_name || user?.email || "User"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user?.user_metadata?.department || "Team Member"}
+              </div>
             </div>
           </div>
         </div>

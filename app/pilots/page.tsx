@@ -25,6 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { useUser } from "@/lib/auth/hooks"
 
 type NavItem = {
   label: string
@@ -60,9 +61,9 @@ const navigationSections: NavSection[] = [
     title: "Pilot Management",
     icon: Layers,
     items: [
-      { label: "Active Pilots", href: "#active-pilots" },
-      { label: "Pilot Pipeline", href: "#pilot-pipeline" },
-      { label: "Lessons Learned", href: "#lessons-learned" },
+      { label: "Active Pilots", href: "/pilots#active-pilots" },
+      { label: "Pilot Pipeline", href: "/pilots#pilot-pipeline" },
+      { label: "Lessons Learned", href: "/pilots#lessons-learned" },
     ],
   },
   {
@@ -96,13 +97,24 @@ type Pilot = {
 
 
 export default function PilotsPage() {
+  const { user } = useUser()
   const [expandedSections, setExpandedSections] = useState<string[]>(["Pilot Management"])
-  const [activeLink, setActiveLink] = useState<string>("#active-pilots")
+  const [activeLink, setActiveLink] = useState<string>("/pilots#active-pilots")
   const [activeTab, setActiveTab] = useState<"active" | "pipeline" | "lessons">("active")
   const [search, setSearch] = useState("")
   const [pilots, setPilots] = useState<Pilot[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Get user initials
+  const getUserInitials = (name: string | undefined) => {
+    if (!name) return "U"
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+  }
 
   useEffect(() => {
     fetchPilots()
@@ -131,9 +143,9 @@ export default function PilotsPage() {
   const handleLinkClick = (href: string) => {
     setActiveLink(href)
     // Map href to tab
-    if (href === "#active-pilots") setActiveTab("active")
-    else if (href === "#pilot-pipeline") setActiveTab("pipeline")
-    else if (href === "#lessons-learned") setActiveTab("lessons")
+    if (href === "/pilots#active-pilots") setActiveTab("active")
+    else if (href === "/pilots#pilot-pipeline") setActiveTab("pipeline")
+    else if (href === "/pilots#lessons-learned") setActiveTab("lessons")
   }
 
   // Filter pilots based on active tab and search
@@ -253,11 +265,15 @@ export default function PilotsPage() {
         <div className="border-t border-border p-4">
           <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              JD
+              {getUserInitials(user?.user_metadata?.full_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground truncate">John Doe</div>
-              <div className="text-xs text-muted-foreground">PMO Manager</div>
+              <div className="text-sm font-medium text-foreground truncate">
+                {user?.user_metadata?.full_name || user?.email || "User"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user?.user_metadata?.department || "Team Member"}
+              </div>
             </div>
           </div>
         </div>
@@ -283,7 +299,7 @@ export default function PilotsPage() {
             <Button
               onClick={() => {
                 setActiveTab("active")
-                setActiveLink("#active-pilots")
+                setActiveLink("/pilots#active-pilots")
               }}
               variant={activeTab === "active" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "active" && "bg-card hover:bg-muted")}
@@ -294,7 +310,7 @@ export default function PilotsPage() {
             <Button
               onClick={() => {
                 setActiveTab("pipeline")
-                setActiveLink("#pilot-pipeline")
+                setActiveLink("/pilots#pilot-pipeline")
               }}
               variant={activeTab === "pipeline" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "pipeline" && "bg-card hover:bg-muted")}
@@ -305,7 +321,7 @@ export default function PilotsPage() {
             <Button
               onClick={() => {
                 setActiveTab("lessons")
-                setActiveLink("#lessons-learned")
+                setActiveLink("/pilots#lessons-learned")
               }}
               variant={activeTab === "lessons" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "lessons" && "bg-card hover:bg-muted")}

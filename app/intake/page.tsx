@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Layers, FileText, Database, TrendingUp, ChevronRight, ChevronDown, Send, FileCheck, List } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useUser } from "@/lib/auth/hooks"
 
 type NavItem = {
   label: string
@@ -29,9 +30,9 @@ const navigationSections: NavSection[] = [
     title: "Technology Intake Portal",
     icon: FileText,
     items: [
-      { label: "Submit New Technology Request", href: "#submit-request" },
-      { label: "My Submissions", href: "#my-submissions" },
-      { label: "Intake Review Queue", href: "#review-queue" },
+      { label: "Submit New Technology Request", href: "/intake#submit-request" },
+      { label: "My Submissions", href: "/intake#my-submissions" },
+      { label: "Intake Review Queue", href: "/intake#review-queue" },
     ],
   },
   {
@@ -109,8 +110,9 @@ type ReviewQueueItem = {
 }
 
 export default function IntakePage() {
+  const { user } = useUser()
   const [expandedSections, setExpandedSections] = useState<string[]>(["Technology Intake Portal"])
-  const [activeLink, setActiveLink] = useState<string>("#submit-request")
+  const [activeLink, setActiveLink] = useState<string>("/intake#submit-request")
   const [activeTab, setActiveTab] = useState<"submit" | "mine" | "queue">("submit")
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [mySubmissions, setMySubmissions] = useState<any[]>([])
@@ -119,6 +121,16 @@ export default function IntakePage() {
   const [submitting, setSubmitting] = useState(false)
   const { toast } = useToast()
 
+  // Get user initials
+  const getUserInitials = (name: string | undefined) => {
+    if (!name) return "U"
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+  }
+
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
   }
@@ -126,9 +138,9 @@ export default function IntakePage() {
   const handleLinkClick = (href: string) => {
     setActiveLink(href)
     // Map href to tab
-    if (href === "#submit-request") setActiveTab("submit")
-    else if (href === "#my-submissions") setActiveTab("mine")
-    else if (href === "#review-queue") setActiveTab("queue")
+    if (href === "/intake#submit-request") setActiveTab("submit")
+    else if (href === "/intake#my-submissions") setActiveTab("mine")
+    else if (href === "/intake#review-queue") setActiveTab("queue")
   }
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -265,11 +277,15 @@ export default function IntakePage() {
         <div className="border-t border-border p-4">
           <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              JD
+              {getUserInitials(user?.user_metadata?.full_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground truncate">John Doe</div>
-              <div className="text-xs text-muted-foreground">PMO Manager</div>
+              <div className="text-sm font-medium text-foreground truncate">
+                {user?.user_metadata?.full_name || user?.email || "User"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user?.user_metadata?.department || "Team Member"}
+              </div>
             </div>
           </div>
         </div>
@@ -294,7 +310,7 @@ export default function IntakePage() {
             <Button
               onClick={() => {
                 setActiveTab("submit")
-                setActiveLink("#submit-request")
+                setActiveLink("/intake#submit-request")
               }}
               variant={activeTab === "submit" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "submit" && "bg-card hover:bg-muted")}
@@ -305,7 +321,7 @@ export default function IntakePage() {
             <Button
               onClick={() => {
                 setActiveTab("mine")
-                setActiveLink("#my-submissions")
+                setActiveLink("/intake#my-submissions")
               }}
               variant={activeTab === "mine" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "mine" && "bg-card hover:bg-muted")}
@@ -316,7 +332,7 @@ export default function IntakePage() {
             <Button
               onClick={() => {
                 setActiveTab("queue")
-                setActiveLink("#review-queue")
+                setActiveLink("/intake#review-queue")
               }}
               variant={activeTab === "queue" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "queue" && "bg-card hover:bg-muted")}
@@ -488,7 +504,7 @@ export default function IntakePage() {
                     <Button
                       onClick={() => {
                         setActiveTab("submit")
-                        setActiveLink("#submit-request")
+                        setActiveLink("/intake#submit-request")
                       }}
                       className="gap-2"
                     >

@@ -21,6 +21,7 @@ import {
   Grid3x3,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useUser } from "@/lib/auth/hooks"
 
 type NavItem = {
   label: string
@@ -47,9 +48,9 @@ const navigationSections: NavSection[] = [
     title: "Technology Library",
     icon: Database,
     items: [
-      { label: "All Technologies", href: "#all-technologies" },
-      { label: "Archived / Evaluated Technologies", href: "#archived-technologies" },
-      { label: "Tags & Categories", href: "#tags-categories" },
+      { label: "All Technologies", href: "/library#all-technologies" },
+      { label: "Archived / Evaluated Technologies", href: "/library#archived-technologies" },
+      { label: "Tags & Categories", href: "/library#tags-categories" },
     ],
   },
   {
@@ -90,14 +91,25 @@ type Technology = {
 
 
 export default function LibraryPage() {
+  const { user } = useUser()
   const [expandedSections, setExpandedSections] = useState<string[]>(["Technology Library"])
-  const [activeLink, setActiveLink] = useState<string>("#all-technologies")
+  const [activeLink, setActiveLink] = useState<string>("/library#all-technologies")
   const [activeTab, setActiveTab] = useState<"all" | "archived" | "tags">("all")
   const [search, setSearch] = useState("")
   const [filterTag, setFilterTag] = useState("")
   const [technologies, setTechnologies] = useState<Technology[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Get user initials
+  const getUserInitials = (name: string | undefined) => {
+    if (!name) return "U"
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+  }
 
   useEffect(() => {
     fetchTechnologies()
@@ -126,9 +138,9 @@ export default function LibraryPage() {
   const handleLinkClick = (href: string) => {
     setActiveLink(href)
     // Map href to tab
-    if (href === "#all-technologies") setActiveTab("all")
-    else if (href === "#archived-technologies") setActiveTab("archived")
-    else if (href === "#tags-categories") setActiveTab("tags")
+    if (href === "/library#all-technologies") setActiveTab("all")
+    else if (href === "/library#archived-technologies") setActiveTab("archived")
+    else if (href === "/library#tags-categories") setActiveTab("tags")
   }
 
   // Extract all unique tags
@@ -233,11 +245,15 @@ export default function LibraryPage() {
         <div className="border-t border-border p-4">
           <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              JD
+              {getUserInitials(user?.user_metadata?.full_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground truncate">John Doe</div>
-              <div className="text-xs text-muted-foreground">PMO Manager</div>
+              <div className="text-sm font-medium text-foreground truncate">
+                {user?.user_metadata?.full_name || user?.email || "User"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user?.user_metadata?.department || "Team Member"}
+              </div>
             </div>
           </div>
         </div>
@@ -263,7 +279,7 @@ export default function LibraryPage() {
             <Button
               onClick={() => {
                 setActiveTab("all")
-                setActiveLink("#all-technologies")
+                setActiveLink("/library#all-technologies")
               }}
               variant={activeTab === "all" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "all" && "bg-card hover:bg-muted")}
@@ -274,7 +290,7 @@ export default function LibraryPage() {
             <Button
               onClick={() => {
                 setActiveTab("archived")
-                setActiveLink("#archived-technologies")
+                setActiveLink("/library#archived-technologies")
               }}
               variant={activeTab === "archived" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "archived" && "bg-card hover:bg-muted")}
@@ -285,7 +301,7 @@ export default function LibraryPage() {
             <Button
               onClick={() => {
                 setActiveTab("tags")
-                setActiveLink("#tags-categories")
+                setActiveLink("/library#tags-categories")
               }}
               variant={activeTab === "tags" ? "default" : "outline"}
               className={cn("gap-2", activeTab !== "tags" && "bg-card hover:bg-muted")}
@@ -442,7 +458,7 @@ export default function LibraryPage() {
                               onClick={() => {
                                 setFilterTag(tag)
                                 setActiveTab("all")
-                                setActiveLink("#all-technologies")
+                                setActiveLink("/library#all-technologies")
                               }}
                               className="gap-2 bg-card hover:bg-primary/10 hover:text-primary hover:border-primary"
                             >
