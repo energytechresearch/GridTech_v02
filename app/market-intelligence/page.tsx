@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import {
   ChevronDown,
   ChevronRight,
@@ -18,6 +19,7 @@ import {
   MapPin,
   Target,
   ExternalLink,
+  Bot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -72,6 +74,13 @@ const navigationSections: NavSection[] = [
       { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
       { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
       { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
+    ],
+  },
+  {
+    title: "AI Assistant",
+    icon: Bot,
+    items: [
+      { label: "Portfolio Intelligence Chat", href: "/ai-assistant" },
     ],
   },
 ]
@@ -280,18 +289,19 @@ export default function MarketIntelligencePage() {
                   {isExpanded && (
                     <div className="ml-6 space-y-1 border-l border-border pl-3">
                       {section.items.map((item) => (
-                        <button
+                        <Link
                           key={item.href}
+                          href={item.href}
                           onClick={() => handleLinkClick(item.href)}
                           className={cn(
-                            "block w-full text-left rounded-md px-3 py-2 text-sm transition-colors",
+                            "block rounded-md px-3 py-2 text-sm transition-colors",
                             activeLink === item.href
                               ? "bg-primary/10 text-primary font-medium"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground",
                           )}
                         >
                           {item.label}
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   )}

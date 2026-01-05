@@ -19,6 +19,7 @@ import {
   Tag,
   Archive,
   Grid3x3,
+  Bot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/lib/auth/hooks"
@@ -69,6 +70,13 @@ const navigationSections: NavSection[] = [
       { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
       { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
       { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
+    ],
+  },
+  {
+    title: "AI Assistant",
+    icon: Bot,
+    items: [
+      { label: "Portfolio Intelligence Chat", href: "/ai-assistant" },
     ],
   },
 ]
@@ -198,41 +206,21 @@ export default function LibraryPage() {
                   {/* Section Items */}
                   {isExpanded && (
                     <div className="ml-6 space-y-1 border-l border-border pl-3">
-                      {section.items.map((item) => {
-                        const isExternalLink = item.href.startsWith('/')
-
-                        if (isExternalLink) {
-                          return (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className={cn(
-                                "block rounded-md px-3 py-2 text-sm transition-colors",
-                                activeLink === item.href
-                                  ? "bg-primary/10 text-primary font-medium"
-                                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                              )}
-                            >
-                              {item.label}
-                            </Link>
-                          )
-                        }
-
-                        return (
-                          <button
-                            key={item.href}
-                            onClick={() => handleLinkClick(item.href)}
-                            className={cn(
-                              "block w-full text-left rounded-md px-3 py-2 text-sm transition-colors",
-                              activeLink === item.href
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                            )}
-                          >
-                            {item.label}
-                          </button>
-                        )
-                      })}
+                      {section.items.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => handleLinkClick(item.href)}
+                          className={cn(
+                            "block rounded-md px-3 py-2 text-sm transition-colors",
+                            activeLink === item.href
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          )}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
                     </div>
                   )}
                 </div>

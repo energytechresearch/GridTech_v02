@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Layers, FileText, Database, TrendingUp, ChevronRight, ChevronDown, Send, FileCheck, List } from "lucide-react"
+import { Layers, FileText, Database, TrendingUp, ChevronRight, ChevronDown, Send, FileCheck, List, Bot } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/lib/auth/hooks"
 
@@ -39,27 +40,34 @@ const navigationSections: NavSection[] = [
     title: "Technology Library",
     icon: Database,
     items: [
-      { label: "All Technologies", href: "#all-technologies" },
-      { label: "Archived / Evaluated Technologies", href: "#archived-technologies" },
-      { label: "Tags & Categories", href: "#tags-categories" },
+      { label: "All Technologies", href: "/library#all-technologies" },
+      { label: "Archived / Evaluated Technologies", href: "/library#archived-technologies" },
+      { label: "Tags & Categories", href: "/library#tags-categories" },
     ],
   },
   {
     title: "Pilot Management",
     icon: Layers,
     items: [
-      { label: "Active Pilots", href: "#active-pilots" },
-      { label: "Pilot Pipeline", href: "#pilot-pipeline" },
-      { label: "Lessons Learned", href: "#lessons-learned" },
+      { label: "Active Pilots", href: "/pilots#active-pilots" },
+      { label: "Pilot Pipeline", href: "/pilots#pilot-pipeline" },
+      { label: "Lessons Learned", href: "/pilots#lessons-learned" },
     ],
   },
   {
     title: "Market Intelligence Hub",
     icon: TrendingUp,
     items: [
-      { label: "Technology Watchlist", href: "#watchlist" },
-      { label: "Vendor Landscape", href: "#vendor-landscape" },
-      { label: "Industry Insights", href: "#industry-insights" },
+      { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
+      { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
+      { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
+    ],
+  },
+  {
+    title: "AI Assistant",
+    icon: Bot,
+    items: [
+      { label: "Portfolio Intelligence Chat", href: "/ai-assistant" },
     ],
   },
 ]
@@ -252,18 +260,19 @@ export default function IntakePage() {
                   {isExpanded && (
                     <div className="ml-6 space-y-1 border-l border-border pl-3">
                       {section.items.map((item) => (
-                        <button
+                        <Link
                           key={item.href}
+                          href={item.href}
                           onClick={() => handleLinkClick(item.href)}
                           className={cn(
-                            "block w-full text-left rounded-md px-3 py-2 text-sm transition-colors",
+                            "block rounded-md px-3 py-2 text-sm transition-colors",
                             activeLink === item.href
                               ? "bg-primary/10 text-primary font-medium"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground",
                           )}
                         >
                           {item.label}
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   )}

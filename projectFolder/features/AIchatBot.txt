@@ -1,0 +1,194 @@
+Great idea — an AI chatbot feature fits the PRD perfectly as a productivity and insight layer on top of the Technology Library, Pilot Management, and Portfolio data.
+
+Here’s what an **AI Chatbot Feature Page** could look like — described as a product/feature spec and UX outline that you can plug into your PRD or designs.
+
+---
+
+## **AI Assistant — Portfolio Intelligence Chat**
+
+### **Purpose**
+
+Provide users with a conversational interface to **query portfolio data, summarize insights, retrieve records, and generate reports** using natural language, powered by the OpenAI API and connected to the New Technology Platform database.
+
+---
+
+## **Hero / Header Section**
+
+**Title**
+
+> **Ask Your Grid Technology Assistant**
+
+**Subheadline**
+
+> Search, analyze, and explore your technology portfolio — just by asking.
+
+**Primary CTA**
+
+> **Start a Conversation**
+
+**Supporting Text**
+
+* Reduce time spent searching dashboards
+* Surface portfolio insights instantly
+* Turn data into decisions faster
+
+---
+
+## **Core Feature Areas on the Page**
+
+### **1) Chat Interface Panel (Main Content Area)**
+
+* Conversational text window
+* Message input with:
+
+  * Prompt suggestions
+  * Quick-action chips (e.g., “Find pilots in progress”)
+
+**Example Placeholder Prompts**
+
+* “Show me all active pilots with a high-risk rating.”
+* “Summarize the evaluation status for hydrogen storage technologies.”
+* “What technologies moved from pilot to operations this quarter?”
+* “Generate a short executive summary of the portfolio dashboard.”
+* “List vendors with more than two active initiatives.”
+
+---
+
+### **2) Data-Aware Capabilities Section**
+
+Shows what the chatbot can do:
+
+* 🔍 **Query Database Records**
+
+  * Technology Library entries
+  * Pilot status & lifecycle stage
+  * Risk register items
+  * Intake pipeline
+  * Roadmap alignment tags
+
+* 📊 **Generate Insights & Summaries**
+
+  * Portfolio health rollups
+  * Risk trends
+  * Pilot outcomes
+  * Lessons learned summaries
+
+* 🧩 **Cross-Module Intelligence**
+
+  * Link technologies ↔ pilots
+  * Vendor landscape relationships
+  * Category comparisons
+
+* 📝 **On-Demand Reporting**
+
+  * Executive summaries
+  * Status briefs
+  * Exportable response snippets
+
+---
+
+### **3) Safety, Access & Governance Panel**
+
+Explains guardrails and security:
+
+* Role-based data visibility enforced
+* No schema-altering actions allowed
+* Read-only queries unless explicitly enabled
+* Responses include **source references / record IDs**
+* Sensitive fields masked or excluded
+* Full audit logging of queries
+
+---
+
+### **4) Interaction Modes**
+
+* **Ask & Retrieve Mode**
+
+  * Returns structured answers + reference links
+
+* **Insight Mode**
+
+  * Trend summaries and analysis text
+
+* **Guided Task Mode (optional future)**
+
+  * “Help me design a pilot plan”
+  * “Draft a lessons-learned note”
+
+---
+
+## **Functional Requirements (Excerpt)**
+
+**FR-1: Natural Language Query**
+
+* User enters a question
+* System translates to structured DB query or retrieval pipeline
+* AI composes response using contextual rules
+
+**FR-2: Result Transparency**
+
+* Responses include:
+
+  * Linked records
+  * Dataset scope
+  * Timestamp
+
+**FR-3: Guardrails**
+
+* AI cannot:
+
+  * Modify records
+  * Approve workflows
+  * Change lifecycle states
+
+**FR-4: Data-Scope Enforcement**
+
+* Row-Level Security respected
+* Users only see data they are permitted to access
+
+**FR-5: Response Types**
+
+* Text explanation
+* Tabular summaries
+* KPI rollups
+* Suggested follow-up prompts
+
+---
+
+## **Example Page Layout (Mental Wireframe)**
+
+**Left:** Chat thread (conversation history)
+**Center:** Active chat window + results
+**Right Sidebar:**
+
+* Filters (portfolio / pilot / technology scope)
+* Context chips (time range, category, vendor)
+* Data sources used in answer
+
+---
+
+## **Success Metrics**
+
+* Reduction in time to find pilot or technology records
+* Increased portfolio insights usage
+* Fewer ad-hoc reporting requests to analysts
+* Higher engagement with Technology Library content
+
+---
+
+## **Future Enhancements (Backlog)**
+
+* “Explain this record” context-aware drill-downs
+* Conversational workflow helpers (intake prep, pilot framing)
+* Natural-language portfolio report generator
+* Integration with email / Teams for exported answers
+
+---
+
+## **If you want, I can also:**
+
+* Turn this into a **visual wireframe description**, or
+* Write a **Jira Epic + child stories** for the AI Assistant feature, or
+* Help design the **architecture pattern (RAG / vector DB / API gateway)** for connecting the chatbot safely to your database.
+
+Would you like this feature framed more as **internal tooling** or a **stakeholder-facing intelligence assistant**?

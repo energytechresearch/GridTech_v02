@@ -18,6 +18,7 @@ import {
   Clock,
   AlertCircle,
   Users,
+  Bot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/lib/auth/hooks"
@@ -68,6 +69,13 @@ const navigationSections: NavSection[] = [
       { label: "Technology Watchlist", href: "/market-intelligence#watchlist" },
       { label: "Vendor Landscape", href: "/market-intelligence#vendor-landscape" },
       { label: "Industry Insights", href: "/market-intelligence#industry-insights" },
+    ],
+  },
+  {
+    title: "AI Assistant",
+    icon: Bot,
+    items: [
+      { label: "Portfolio Intelligence Chat", href: "/ai-assistant" },
     ],
   },
 ]

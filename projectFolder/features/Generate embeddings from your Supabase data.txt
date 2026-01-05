@@ -1,0 +1,44 @@
+Generate embeddings from your Supabase data
+
+You typically do this once per row, or whenever data changes.
+
+Here is some sample code. 
+
+Example (Node.js)
+import OpenAI from "openai";
+import { createClient } from "@supabase/supabase-js";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+async function embedAndStore(text) {
+  const embeddingResponse = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: text
+  });
+
+  const embedding = embeddingResponse.data[0].embedding;
+
+  await supabase.from("documents").insert({
+    content: text,
+    embedding
+  });
+}
+
+
+Run this for:
+
+Each row in a table
+
+Each paragraph of a document
+
+Each FAQ answer
+
+Each chat log, etc.
+
+👉 Chunking tip:
+Split long text into chunks of ~300–800 tokens before embedding.

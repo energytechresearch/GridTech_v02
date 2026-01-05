@@ -1,0 +1,273 @@
+Absolutely — here’s a **front-end, step-by-step implementation guide** for building the AI Chatbot Feature Page, assuming a modern React / Next.js app. The steps focus on layout, components, state flow, and wiring the UI to the OpenAI API and your database integration layer.
+
+I’ll keep this **front-end–focused** (what the page does and how to build it), not backend architecture.
+
+---
+
+# ✅ **AI Chatbot Feature Page — Front-End Build Guide**
+
+## **Tech Stack Assumptions**
+
+(Adjust if different)
+
+* Next.js (App Router or Pages)
+* React components
+* Tailwind (or similar CSS framework)
+* API route or backend endpoint that talks to:
+
+  * OpenAI API
+  * Portfolio DB / Retrieval Layer
+
+---
+
+## **STEP 1 — Create the Page Layout**
+
+Create a new page, e.g.:
+
+* `/ai-assistant`
+* `/portfolio/chat`
+* or inside Market Intelligence Hub
+
+**Page Layout Requirements**
+
+* Left column → Chat history / thread
+* Center panel → Chat conversation + responses
+* Right panel → Context / filters / metadata
+
+Structure the base layout:
+
+```jsx
+<div className="flex h-screen">
+  {/* Left Sidebar */}
+  <aside className="w-64 border-r p-4">
+    {/* Conversation List / History */}
+  </aside>
+
+  {/* Main Chat Panel */}
+  <main className="flex flex-col flex-1">
+    {/* Messages */}
+    {/* Input */}
+  </main>
+
+  {/* Right Context Panel */}
+  <aside className="w-72 border-l p-4">
+    {/* Filters / Data Sources / Scope */}
+  </aside>
+</div>
+```
+
+---
+
+## **STEP 2 — Build the Chat Thread Display**
+
+Inside the **main panel**, add a scrollable area for the conversation:
+
+```jsx
+<div className="flex-1 overflow-y-auto p-4 space-y-4">
+  {messages.map((msg, i) => (
+    <div
+      key={i}
+      className={`p-3 rounded-lg ${msg.role === 'user'
+        ? 'bg-blue-50 self-end'
+        : 'bg-gray-50'
+      }`}
+    >
+      {msg.content}
+    </div>
+  ))}
+</div>
+```
+
+**Messages should support:**
+
+* user messages
+* assistant responses
+* structured replies (tables, IDs, summaries) — can enhance later
+
+---
+
+## **STEP 3 — Add the Chat Input Bar**
+
+Add message input + submit button:
+
+```jsx
+<form onSubmit={handleSend} className="border-t p-3 flex gap-2">
+  <input
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    placeholder="Ask about pilots, technologies, or risks..."
+    className="flex-1 border rounded px-3 py-2"
+  />
+  <button className="px-4 py-2 rounded bg-blue-600 text-white">
+    Send
+  </button>
+</form>
+```
+
+**UX Enhancements (recommended)**
+
+* Enter = send
+* Shift+Enter = new line
+* Disable send while loading
+
+---
+
+## **STEP 4 — Wire Messages to a Chat API Endpoint**
+
+Create a function such as:
+
+```jsx
+async function handleSend(e) {
+  e.preventDefault();
+
+  const newMessage = { role: 'user', content: input };
+  setMessages([...messages, newMessage]);
+  setInput('');
+  setLoading(true);
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [...messages, newMessage],
+    }),
+  });
+
+  const data = await res.json();
+
+  setMessages([...messages, newMessage, data.reply]);
+  setLoading(false);
+}
+```
+
+> The `/api/chat` route will call the OpenAI API + your database retrieval logic (backend handled separately).
+
+---
+
+## **STEP 5 — Add “Suggested Prompts” Chips**
+
+Place these above the input or below the header:
+
+```jsx
+const suggestions = [
+  "Show me active pilots with high risk scores",
+  "Summarize hydrogen storage technologies",
+  "What technologies moved to operations this quarter?"
+];
+
+<button
+  onClick={() => setInput(text)}
+  className="px-3 py-1 border rounded"
+>
+  {text}
+</button>
+```
+
+Purpose:
+
+* guide discovery
+* reduce typing friction
+* communicate capabilities
+
+---
+
+## **STEP 6 — Build the Right-Side Context Panel**
+
+This panel should show:
+
+* Current portfolio scope
+* Filters applied
+* Data sources referenced in responses
+* Security/visibility note
+
+Example structure:
+
+```jsx
+<div className="space-y-4">
+  <h3 className="font-semibold">Context</h3>
+
+  <div>
+    <label>Data Scope</label>
+    <select className="w-full border rounded px-2 py-1">
+      <option>Full Portfolio</option>
+      <option>Pilots Only</option>
+      <option>Technology Library</option>
+    </select>
+  </div>
+
+  <div>
+    <h4 className="font-medium">Sources Used</h4>
+    <ul className="text-sm text-gray-600">
+      <li>Technologies</li>
+      <li>Pilots</li>
+      <li>Risk Register</li>
+    </ul>
+  </div>
+
+  <div className="text-xs text-gray-500 border-t pt-2">
+    Role-based access enforced. Sensitive fields hidden.
+  </div>
+</div>
+```
+
+---
+
+## **STEP 7 — Handle Loading & Streaming Response UI**
+
+Show “assistant is thinking” feedback:
+
+```jsx
+{loading && (
+  <div className="text-gray-500 text-sm">
+    Analyzing portfolio data…
+  </div>
+)}
+```
+
+Optional upgrade:
+
+* stream text tokens
+* animated typing indicator
+* skeleton table preview
+
+---
+
+## **STEP 8 — Add Structured Response Rendering (Later Iteration)**
+
+Support:
+
+* tables
+* KPI summaries
+* clickable record links
+
+Examples:
+
+* Render Markdown
+* Render JSON sections into tables
+* Expandable record cards
+
+---
+
+## **STEP 9 — Apply Role-Based UI Behavior**
+
+Front-end behaviors should match PRD:
+
+* hide features user cannot access
+* show masked fields when necessary
+* disable write actions (read-only assistant)
+
+Most enforcement still happens **server-side**, but cues belong in UI.
+
+---
+
+## **STEP 10 — User Testing Checklist**
+
+Verify:
+
+* Page loads in under ~2 seconds
+* Messages display consistently
+* Input handles long queries
+* Filters change response behavior
+* Assistant responds with references where possible
+* No restricted data appears for lower-access users
+
