@@ -1,6 +1,12 @@
 -- Enable the pgvector extension for vector similarity search
 CREATE EXTENSION IF NOT EXISTS vector;
 
+-- Drop existing functions if they exist (to allow schema changes)
+DROP FUNCTION IF EXISTS match_technologies(vector, float, int);
+DROP FUNCTION IF EXISTS match_pilots(vector, float, int);
+DROP FUNCTION IF EXISTS match_watchlist(vector, float, int);
+DROP FUNCTION IF EXISTS match_portfolio(vector, float, int);
+
 -- Add embedding columns to technologies table
 ALTER TABLE technologies
 ADD COLUMN IF NOT EXISTS embedding vector(1536),
@@ -38,7 +44,7 @@ CREATE OR REPLACE FUNCTION match_technologies(
 RETURNS TABLE (
   id uuid,
   tech_id text,
-  name text,
+  title text,
   description text,
   category text,
   status text,
@@ -52,7 +58,7 @@ BEGIN
   SELECT
     technologies.id,
     technologies.tech_id,
-    technologies.name,
+    technologies.title,
     technologies.description,
     technologies.category,
     technologies.status,
@@ -74,9 +80,8 @@ CREATE OR REPLACE FUNCTION match_pilots(
 RETURNS TABLE (
   id uuid,
   pilot_id text,
-  name text,
-  description text,
-  technology text,
+  title text,
+  technology_id text,
   status text,
   content_for_search text,
   similarity float
@@ -88,9 +93,8 @@ BEGIN
   SELECT
     pilots.id,
     pilots.pilot_id,
-    pilots.name,
-    pilots.description,
-    pilots.technology,
+    pilots.title,
+    pilots.technology_id,
     pilots.status,
     pilots.content_for_search,
     1 - (pilots.embedding <=> query_embedding) AS similarity
@@ -157,7 +161,7 @@ BEGIN
     SELECT
       'technology'::text AS source,
       technologies.id,
-      technologies.name AS title,
+      technologies.title,
       technologies.description,
       technologies.content_for_search AS content,
       1 - (technologies.embedding <=> query_embedding) AS similarity
@@ -169,8 +173,8 @@ BEGIN
     SELECT
       'pilot'::text AS source,
       pilots.id,
-      pilots.name AS title,
-      pilots.description,
+      pilots.title,
+      pilots.objectives AS description,
       pilots.content_for_search AS content,
       1 - (pilots.embedding <=> query_embedding) AS similarity
     FROM pilots

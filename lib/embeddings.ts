@@ -87,7 +87,7 @@ export function formatSearchResultsForAI(results: any[]): string {
   const formatted = results
     .map((result, index) => {
       const source = result.source || "data"
-      const title = result.title || result.name || "Untitled"
+      const title = result.title || "Untitled"
       const content = result.content || result.content_for_search || result.description || ""
       const similarity = (result.similarity * 100).toFixed(1)
 
@@ -103,22 +103,22 @@ export function formatSearchResultsForAI(results: any[]): string {
  */
 export async function embedTechnology(techData: {
   id: string
-  name: string
+  title: string
   category: string
   description: string
   status: string
-  use_case?: string
+  type?: string
   benefits?: string
   risks?: string
 }) {
   const content = [
-    `Technology: ${techData.name}`,
+    `Technology: ${techData.title}`,
     `Category: ${techData.category}`,
     `Status: ${techData.status}`,
     `Description: ${techData.description}`,
   ]
 
-  if (techData.use_case) content.push(`Use Case: ${techData.use_case}`)
+  if (techData.type) content.push(`Type: ${techData.type}`)
   if (techData.benefits) content.push(`Benefits: ${techData.benefits}`)
   if (techData.risks) content.push(`Risks: ${techData.risks}`)
 
@@ -136,26 +136,24 @@ export async function embedTechnology(techData: {
  */
 export async function embedPilot(pilotData: {
   id: string
-  name: string
-  description: string
-  technology: string
+  title: string
+  technology_id: string
   status: string
   sponsor?: string
   location?: string
   objectives?: string
-  outcomes?: string
+  lessons_learned?: string
 }) {
   const content = [
-    `Pilot: ${pilotData.name}`,
-    `Technology: ${pilotData.technology}`,
+    `Pilot: ${pilotData.title}`,
+    `Technology ID: ${pilotData.technology_id}`,
     `Status: ${pilotData.status}`,
-    `Description: ${pilotData.description}`,
   ]
 
   if (pilotData.sponsor) content.push(`Sponsor: ${pilotData.sponsor}`)
   if (pilotData.location) content.push(`Location: ${pilotData.location}`)
   if (pilotData.objectives) content.push(`Objectives: ${pilotData.objectives}`)
-  if (pilotData.outcomes) content.push(`Outcomes: ${pilotData.outcomes}`)
+  if (pilotData.lessons_learned) content.push(`Lessons Learned: ${pilotData.lessons_learned}`)
 
   const contentText = content.join("\n")
   const embedding = await generateEmbedding(contentText)

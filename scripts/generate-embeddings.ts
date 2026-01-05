@@ -27,11 +27,11 @@ const supabase = createClient(
 interface Technology {
   id: string
   tech_id: string
-  name: string
+  title: string
   category: string
   description: string
   status: string
-  use_case?: string
+  type?: string
   benefits?: string
   risks?: string
 }
@@ -39,15 +39,14 @@ interface Technology {
 interface Pilot {
   id: string
   pilot_id: string
-  name: string
-  description: string
-  technology: string
+  title: string
+  technology_id: string
   status: string
   sponsor?: string
   location?: string
   start_date?: string
   objectives?: string
-  outcomes?: string
+  lessons_learned?: string
 }
 
 interface WatchlistItem {
@@ -64,13 +63,13 @@ interface WatchlistItem {
  */
 function getTechnologyContent(tech: Technology): string {
   const parts = [
-    `Technology: ${tech.name}`,
+    `Technology: ${tech.title}`,
     `Category: ${tech.category}`,
     `Status: ${tech.status}`,
     `Description: ${tech.description}`,
   ]
 
-  if (tech.use_case) parts.push(`Use Case: ${tech.use_case}`)
+  if (tech.type) parts.push(`Type: ${tech.type}`)
   if (tech.benefits) parts.push(`Benefits: ${tech.benefits}`)
   if (tech.risks) parts.push(`Risks: ${tech.risks}`)
 
@@ -82,16 +81,15 @@ function getTechnologyContent(tech: Technology): string {
  */
 function getPilotContent(pilot: Pilot): string {
   const parts = [
-    `Pilot: ${pilot.name}`,
-    `Technology: ${pilot.technology}`,
+    `Pilot: ${pilot.title}`,
+    `Technology ID: ${pilot.technology_id}`,
     `Status: ${pilot.status}`,
-    `Description: ${pilot.description}`,
   ]
 
   if (pilot.sponsor) parts.push(`Sponsor: ${pilot.sponsor}`)
   if (pilot.location) parts.push(`Location: ${pilot.location}`)
   if (pilot.objectives) parts.push(`Objectives: ${pilot.objectives}`)
-  if (pilot.outcomes) parts.push(`Outcomes: ${pilot.outcomes}`)
+  if (pilot.lessons_learned) parts.push(`Lessons Learned: ${pilot.lessons_learned}`)
 
   return parts.join("\n")
 }
@@ -159,16 +157,16 @@ async function processTechnologies() {
         .eq("id", tech.id)
 
       if (updateError) {
-        console.error(`Error updating technology ${tech.name}:`, updateError)
+        console.error(`Error updating technology ${tech.title}:`, updateError)
       } else {
         processed++
-        console.log(`✅ Processed: ${tech.name}`)
+        console.log(`✅ Processed: ${tech.title}`)
       }
 
       // Rate limit: small delay between requests
       await new Promise(resolve => setTimeout(resolve, 100))
     } catch (error) {
-      console.error(`Error processing technology ${tech.name}:`, error)
+      console.error(`Error processing technology ${tech.title}:`, error)
     }
   }
 
@@ -210,16 +208,16 @@ async function processPilots() {
         .eq("id", pilot.id)
 
       if (updateError) {
-        console.error(`Error updating pilot ${pilot.name}:`, updateError)
+        console.error(`Error updating pilot ${pilot.title}:`, updateError)
       } else {
         processed++
-        console.log(`✅ Processed: ${pilot.name}`)
+        console.log(`✅ Processed: ${pilot.title}`)
       }
 
       // Rate limit: small delay between requests
       await new Promise(resolve => setTimeout(resolve, 100))
     } catch (error) {
-      console.error(`Error processing pilot ${pilot.name}:`, error)
+      console.error(`Error processing pilot ${pilot.title}:`, error)
     }
   }
 
