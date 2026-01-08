@@ -1,0 +1,158 @@
+Core Tables
+1. evaluations
+CREATE TABLE evaluations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title VARCHAR NOT NULL,
+  vendor VARCHAR NOT NULL,
+  product VARCHAR NOT NULL,
+  category VARCHAR NOT NULL, -- e.g., "DER/Energy Storage"
+  stage VARCHAR NOT NULL DEFAULT 'evaluation', -- evaluation, pilot, deployment, scale
+  status VARCHAR NOT NULL DEFAULT 'active', -- active, completed, cancelled
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_by UUID REFERENCES auth.users(id)
+);
+
+2. financial_inputs
+CREATE TABLE financial_inputs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  scenario_name VARCHAR NOT NULL DEFAULT 'base-case',
+  capex DECIMAL(15,2),
+  annual_opex DECIMAL(15,2),
+  incentives DECIMAL(15,2),
+  annual_revenue DECIMAL(15,2),
+  discount_rate DECIMAL(5,2),
+  project_lifetime INTEGER,
+  irr DECIMAL(5,2),
+  npv DECIMAL(15,2),
+  payback_years DECIMAL(4,1),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+3. vendor_scores
+CREATE TABLE vendor_scores (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  vendor_name VARCHAR NOT NULL,
+  cost_score DECIMAL(3,1),
+  performance_score DECIMAL(3,1),
+  reliability_score DECIMAL(3,1),
+  interoperability_score DECIMAL(3,1),
+  roadmap_score DECIMAL(3,1),
+  esg_score DECIMAL(3,1),
+  support_score DECIMAL(3,1),
+  total_score DECIMAL(4,2),
+  is_selected BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+4. scoring_criteria
+CREATE TABLE scoring_criteria (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  criterion_name VARCHAR NOT NULL,
+  weight_percentage INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+5. risks
+CREATE TABLE risks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  title VARCHAR NOT NULL,
+  description TEXT,
+  impact_level VARCHAR NOT NULL, -- low, medium, high
+  likelihood_level VARCHAR NOT NULL, -- low, medium, high
+  linked_assumptions TEXT[],
+  owner VARCHAR,
+  mitigation_strategy TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+6. diligence_items
+CREATE TABLE diligence_items (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  category VARCHAR NOT NULL, -- technical, financial, cybersecurity, regulatory, supply_chain
+  item_name VARCHAR NOT NULL,
+  status VARCHAR NOT NULL DEFAULT 'not_started', -- not_started, in_progress, complete
+  completed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+7. documents
+CREATE TABLE documents (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  filename VARCHAR NOT NULL,
+  file_path VARCHAR NOT NULL,
+  file_size INTEGER,
+  mime_type VARCHAR,
+  uploaded_by UUID REFERENCES auth.users(id),
+  uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+8. approvals
+CREATE TABLE approvals (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  approver_role VARCHAR NOT NULL,
+  approver_name VARCHAR NOT NULL,
+  status VARCHAR NOT NULL DEFAULT 'pending', -- pending, approved, rejected
+  approval_date TIMESTAMP WITH TIME ZONE,
+  comments TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+9. tco_breakdown
+CREATE TABLE tco_breakdown (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  scenario_name VARCHAR NOT NULL DEFAULT 'base-case',
+  procurement_cost DECIMAL(15,2),
+  installation_cost DECIMAL(15,2),
+  maintenance_cost DECIMAL(15,2),
+  training_cost DECIMAL(15,2),
+  decommissioning_cost DECIMAL(15,2),
+  total_tco DECIMAL(15,2),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+10. sensitivity_analysis
+CREATE TABLE sensitivity_analysis (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  evaluation_id UUID REFERENCES evaluations(id) ON DELETE CASCADE,
+  scenario_name VARCHAR NOT NULL,
+  description TEXT,
+  irr_result DECIMAL(5,2),
+  variance_from_base DECIMAL(5,2),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+Row Level Security (RLS) Policies
+-- Enable RLS on all tables
+ALTER TABLE evaluations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE financial_inputs ENABLE ROW LEVEL SECURITY;
+-- ... (enable for all tables)
+
+-- Example policy for evaluations table
+CREATE POLICY "Users can view evaluations they have access to" ON evaluations
+  FOR SELECT USING (
+    auth.uid() = created_by OR 
+    auth.uid() IN (
+      SELECT user_id FROM evaluation_permissions 
+      WHERE evaluation_id = evaluations.id
+    )
+  );
+
+Indexes for Performance
+-- Indexes for common queries
+CREATE INDEX idx_evaluations_created_by ON evaluations(created_by);
+CREATE INDEX idx_evaluations_stage ON evaluations(stage);
+CREATE INDEX idx_financial_inputs_evaluation_id ON financial_inputs(evaluation_id);
+CREATE INDEX idx_vendor_scores_evaluation_id ON vendor_scores(evaluation_id);
+CREATE INDEX idx_risks_evaluation_id ON risks(evaluation_id);
+CREATE INDEX idx_documents_evaluation_id ON documents(evaluation_id);

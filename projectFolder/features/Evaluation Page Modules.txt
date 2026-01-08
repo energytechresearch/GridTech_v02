@@ -1,0 +1,42 @@
+Evaluation Page Modules Specifications
+A) Returns Analysis
+
+Inputs: CAPEX, OPEX, incentives, avoided costs, degradation, utilization, tariffs, revenue streams (e.g., capacity payments), discount rate.
+Outputs: IRR, NPV, Payback, annual cash‑flow table, sensitivity cases (±% CAPEX/OPEX, adoption rate, performance, tariff changes).
+Controls: Add/Edit assumptions; scenario save & compare; export (PDF/Excel).
+
+B) Total Cost of Ownership (TCO) & Downside
+
+Lifecycle cost breakdown (procure, install, integration, maintenance, training, decommission).
+Downside scenarios: schedule slip, cost overrun, under‑performance, policy/tariff change.
+TCO vs baseline (“do nothing” or incumbent vendor) comparison.
+
+C) Competitive Vendor Comparison — Market Map
+
+Define comparator set and criteria weighting (cost, performance, reliability, interoperability, roadmap, ESG, support/SLA, security).
+Vendor scorecards (normalized and weighted).
+Visuals: 2×2 (e.g., Value vs Risk), radar charts, table with traffic‑light indicators.
+
+D) Risk Register (Assumption‑Linked)
+
+Risk entries: description, linked assumption(s), likelihood, impact, owner, mitigation, residual risk, trigger, status.
+Views: risk heatmap; filter by theme and stage.
+Tie risks to decision gates and sensitivity outcomes.
+
+E) Diligence Coordination
+
+Checklist templates: technical, financial, cybersecurity, compliance/interconnection, safety, supply chain.
+Assign owners & due dates; upload artifacts; status tracking.
+Audit trail of all changes & approvals.
+
+F) Decision Record
+
+Stage gates (Evaluation → Pilot → Deployment → Scale).
+Required artifacts to advance; approvers (Finance/PMO/Engineering).
+Final go/no‑go + rationale snapshot preserved.
+
+G) Tagging & Taxonomy
+
+Theme tags: DER/Microgrid/Automation/Reliability/Capacity.
+Technology types, grid services, standards supported (e.g., IEEE/IEC—metadata only).
+

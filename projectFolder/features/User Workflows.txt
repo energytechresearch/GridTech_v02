@@ -1,0 +1,16 @@
+User Workflows
+Create Evaluation
+
+Select theme → choose vendor/product or add new
+Enter baseline assumptions (auto‑defaults from template)
+Add financial inputs → run Returns Analysis → save base case
+Create sensitivity scenarios (e.g., +10% CAPEX, −5% performance)
+Populate TCO & Downside → compare to baseline/incumbent
+Add competitors → weight criteria → generate Market Map
+Add risks, link assumptions → define mitigations
+Run diligence checklist; attach artifacts
+Request approvals → record decision; export “Investment Case” PDF
+
+Portfolio Review
+
+Filter evaluations by theme/stage; compare IRR/NPV & risk; prioritize pipeline.

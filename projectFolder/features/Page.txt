@@ -1,0 +1,1123 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import {
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  FileCheck,
+  Settings,
+  Save,
+  Download,
+  Layers,
+  BarChart3,
+  Target,
+} from "lucide-react"
+
+export default function EvaluationPage() {
+  const [selectedScenario, setSelectedScenario] = useState("base-case")
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card sticky top-0 z-50">
+        <nav className="container mx-auto flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+              <Layers className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-semibold text-foreground">GridTech</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm">
+              <a href="/">Back to Home</a>
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Evaluation Header */}
+      <div className="border-b border-border bg-card">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold text-foreground">Battery Storage System Evaluation</h1>
+                <Badge variant="secondary">Pilot Stage</Badge>
+              </div>
+              <p className="text-muted-foreground mb-3">
+                Vendor: <span className="font-medium text-foreground">Tesla Energy</span> | Product:{" "}
+                <span className="font-medium text-foreground">Megapack 2XL</span>
+              </p>
+              <div className="flex gap-2">
+                <Badge variant="outline">DER/Energy Storage</Badge>
+                <Badge variant="outline">Grid Services</Badge>
+                <Badge variant="outline">Capacity</Badge>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button size="sm">
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-6">
+        <div className="flex gap-6">
+          {/* Main Content */}
+          <div className="flex-1">
+            <Tabs defaultValue="returns" className="w-full">
+              <TabsList className="grid w-full grid-cols-6 mb-6">
+                <TabsTrigger value="returns">Returns</TabsTrigger>
+                <TabsTrigger value="tco">TCO & Downside</TabsTrigger>
+                <TabsTrigger value="market">Market Map</TabsTrigger>
+                <TabsTrigger value="risks">Risks</TabsTrigger>
+                <TabsTrigger value="diligence">Diligence</TabsTrigger>
+                <TabsTrigger value="decision">Decision</TabsTrigger>
+              </TabsList>
+
+              {/* Returns Analysis Tab */}
+              <TabsContent value="returns" className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">IRR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-foreground">12.4%</div>
+                      <p className="text-xs text-muted-foreground mt-1">Internal Rate of Return</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">NPV</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-foreground">$8.2M</div>
+                      <p className="text-xs text-muted-foreground mt-1">Net Present Value</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Payback</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-foreground">6.8 yrs</div>
+                      <p className="text-xs text-muted-foreground mt-1">Simple Payback Period</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Financial Inputs</CardTitle>
+                    <CardDescription>
+                      Configure capital and operating assumptions for the investment model
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="capex">CAPEX (Total Capital Investment)</Label>
+                        <Input id="capex" type="text" placeholder="$45,000,000" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="opex">Annual OPEX</Label>
+                        <Input id="opex" type="text" placeholder="$850,000" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="incentives">Federal/State Incentives (ITC)</Label>
+                        <Input id="incentives" type="text" placeholder="$13,500,000" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="revenue">Annual Revenue (Capacity Payments)</Label>
+                        <Input id="revenue" type="text" placeholder="$6,200,000" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="discount">Discount Rate (WACC)</Label>
+                        <Input id="discount" type="text" placeholder="8.5%" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lifetime">Project Lifetime</Label>
+                        <Input id="lifetime" type="text" placeholder="20 years" />
+                      </div>
+                    </div>
+                    <Button className="mt-4">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Recalculate Returns
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Sensitivity Analysis</CardTitle>
+                    <CardDescription>Compare IRR outcomes across key variable adjustments</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">Base Case</p>
+                          <p className="text-sm text-muted-foreground">Current assumptions</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-lg text-foreground">12.4%</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border border-border rounded-lg bg-muted/30">
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">+10% CAPEX</p>
+                          <p className="text-sm text-muted-foreground">Cost overrun scenario</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-lg text-destructive">10.8%</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">−5% Performance</p>
+                          <p className="text-sm text-muted-foreground">Degradation scenario</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-lg text-foreground">11.6%</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">Tariff −15%</p>
+                          <p className="text-sm text-muted-foreground">Regulatory change</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-lg text-destructive">9.2%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* TCO & Downside Tab */}
+              <TabsContent value="tco" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Total Cost of Ownership Breakdown</CardTitle>
+                    <CardDescription>Complete lifecycle cost analysis over 20-year project horizon</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between py-2 border-b border-border">
+                        <span className="text-foreground">Procurement & Equipment</span>
+                        <span className="font-semibold text-foreground">$38,500,000</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-border">
+                        <span className="text-foreground">Installation & Integration</span>
+                        <span className="font-semibold text-foreground">$6,500,000</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-border">
+                        <span className="text-foreground">Annual Maintenance (20 years)</span>
+                        <span className="font-semibold text-foreground">$17,000,000</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-border">
+                        <span className="text-foreground">Training & Documentation</span>
+                        <span className="font-semibold text-foreground">$450,000</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-border">
+                        <span className="text-foreground">Decommissioning (Year 20)</span>
+                        <span className="font-semibold text-foreground">$1,200,000</span>
+                      </div>
+                      <div className="flex items-center justify-between py-3 bg-muted rounded-lg px-3 mt-2">
+                        <span className="font-bold text-foreground">Total TCO</span>
+                        <span className="font-bold text-xl text-foreground">$63,650,000</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Downside Scenarios</CardTitle>
+                    <CardDescription>Risk-adjusted outcomes and mitigation strategies</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="border border-destructive/20 bg-destructive/5 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground mb-1">6-Month Schedule Slip</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Interconnection delays, permitting issues
+                          </p>
+                          <p className="text-sm font-medium text-foreground">
+                            Impact: Additional $2.1M in financing costs, delayed revenue
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border border-destructive/20 bg-destructive/5 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground mb-1">15% Cost Overrun</h4>
+                          <p className="text-sm text-muted-foreground mb-2">Supply chain disruption, labor shortage</p>
+                          <p className="text-sm font-medium text-foreground">
+                            Impact: $6.75M additional CAPEX, IRR drops to 10.1%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border border-border bg-muted/30 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground mb-1">Performance Degradation</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Battery capacity fade exceeds warranty terms
+                          </p>
+                          <p className="text-sm font-medium text-foreground">
+                            Impact: 8% reduction in revenue years 10-20, IRR 11.3%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>TCO Comparison vs Baseline</CardTitle>
+                    <CardDescription>Comparison against do-nothing scenario and incumbent vendor</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border-2 border-primary rounded-lg bg-primary/5">
+                        <div>
+                          <p className="font-semibold text-foreground">Tesla Megapack 2XL (Selected)</p>
+                          <p className="text-sm text-muted-foreground">20-year TCO</p>
+                        </div>
+                        <p className="font-bold text-xl text-foreground">$63.7M</p>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                        <div>
+                          <p className="font-semibold text-foreground">Do Nothing (Baseline)</p>
+                          <p className="text-sm text-muted-foreground">Opportunity cost of inaction</p>
+                        </div>
+                        <p className="font-bold text-xl text-muted-foreground">N/A</p>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                        <div>
+                          <p className="font-semibold text-foreground">Incumbent: Fluence Gridstack</p>
+                          <p className="text-sm text-muted-foreground">Alternative vendor TCO</p>
+                        </div>
+                        <p className="font-bold text-xl text-foreground">$68.2M</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Market Map Tab */}
+              <TabsContent value="market" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Competitive Vendor Scorecard</CardTitle>
+                    <CardDescription>Weighted evaluation across key decision criteria</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-12 gap-2 font-semibold text-sm text-muted-foreground pb-2 border-b border-border">
+                        <div className="col-span-3">Vendor</div>
+                        <div className="col-span-1 text-center">Cost</div>
+                        <div className="col-span-1 text-center">Performance</div>
+                        <div className="col-span-1 text-center">Reliability</div>
+                        <div className="col-span-1 text-center">Interop</div>
+                        <div className="col-span-1 text-center">Roadmap</div>
+                        <div className="col-span-1 text-center">ESG</div>
+                        <div className="col-span-1 text-center">Support</div>
+                        <div className="col-span-2 text-right">Total Score</div>
+                      </div>
+
+                      <div className="grid grid-cols-12 gap-2 items-center p-3 border-2 border-primary bg-primary/5 rounded-lg">
+                        <div className="col-span-3 font-semibold text-foreground">Tesla Energy</div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            9.2
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            9.5
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.8
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.5</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            9.0
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.5
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            9.0
+                          </Badge>
+                        </div>
+                        <div className="col-span-2 text-right font-bold text-lg text-foreground">8.79</div>
+                      </div>
+
+                      <div className="grid grid-cols-12 gap-2 items-center p-3 border border-border rounded-lg">
+                        <div className="col-span-3 font-semibold text-foreground">Fluence Energy</div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.8</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.9
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            9.2
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.5
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.8</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.5</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.8
+                          </Badge>
+                        </div>
+                        <div className="col-span-2 text-right font-bold text-lg text-foreground">8.36</div>
+                      </div>
+
+                      <div className="grid grid-cols-12 gap-2 items-center p-3 border border-border rounded-lg">
+                        <div className="col-span-3 font-semibold text-foreground">Wartsila Energy</div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.5</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.8</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            9.0
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.2
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.2</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.8</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.5
+                          </Badge>
+                        </div>
+                        <div className="col-span-2 text-right font-bold text-lg text-foreground">8.00</div>
+                      </div>
+
+                      <div className="grid grid-cols-12 gap-2 items-center p-3 border border-border rounded-lg">
+                        <div className="col-span-3 font-semibold text-foreground">Powin Energy</div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="default" className="bg-green-600">
+                            8.5
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.5</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.8</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.5</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.0</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.2</Badge>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <Badge variant="secondary">7.8</Badge>
+                        </div>
+                        <div className="col-span-2 text-right font-bold text-lg text-foreground">7.61</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Criteria Weighting</CardTitle>
+                    <CardDescription>Adjust importance of evaluation dimensions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Cost Competitiveness</span>
+                        <Badge>25%</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Technical Performance</span>
+                        <Badge>20%</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Reliability & Track Record</span>
+                        <Badge>20%</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Interoperability & Integration</span>
+                        <Badge>15%</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Product Roadmap & Innovation</span>
+                        <Badge>10%</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">ESG & Sustainability</span>
+                        <Badge>5%</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Support & Service</span>
+                        <Badge>5%</Badge>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="mt-4 w-full bg-transparent">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Adjust Weights
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Risks Tab */}
+              <TabsContent value="risks" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Risk Register</CardTitle>
+                    <CardDescription>Identified risks with mitigation strategies and ownership</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="border border-border rounded-lg p-4 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">Supply Chain Disruption</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Battery cell shortages or tariff changes could delay delivery or increase costs
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="destructive">High Impact</Badge>
+                          <Badge variant="outline">Medium Likelihood</Badge>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-border text-sm">
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Linked Assumption:</span> CAPEX, Project
+                          Timeline
+                        </p>
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Owner:</span> Supply Chain Manager
+                        </p>
+                        <p className="text-muted-foreground">
+                          <span className="font-medium text-foreground">Mitigation:</span> Diversify suppliers, secure
+                          long-lead items early, contract price protection
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border border-border rounded-lg p-4 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">Interconnection Queue Delay</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            ISO queue processing takes longer than expected, delaying commercial operation
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="destructive">High Impact</Badge>
+                          <Badge variant="destructive">High Likelihood</Badge>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-border text-sm">
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Linked Assumption:</span> Revenue Start Date,
+                          Financing Costs
+                        </p>
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Owner:</span> Regulatory Affairs
+                        </p>
+                        <p className="text-muted-foreground">
+                          <span className="font-medium text-foreground">Mitigation:</span> Early ISO engagement, buffer
+                          timeline, parallel engineering studies
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border border-border rounded-lg p-4 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">Tariff Structure Changes</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Regulatory changes reduce capacity payment rates or alter market rules
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="destructive">High Impact</Badge>
+                          <Badge variant="outline">Low Likelihood</Badge>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-border text-sm">
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Linked Assumption:</span> Annual Revenue, IRR
+                        </p>
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Owner:</span> Finance Director
+                        </p>
+                        <p className="text-muted-foreground">
+                          <span className="font-medium text-foreground">Mitigation:</span> Monitor regulatory dockets,
+                          diversify revenue streams, advocate for stable policy
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border border-border rounded-lg p-4 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">Cybersecurity Vulnerability</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Energy management system lacks adequate security controls for grid-connected asset
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">Medium Impact</Badge>
+                          <Badge variant="outline">Medium Likelihood</Badge>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-border text-sm">
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Linked Assumption:</span> Compliance
+                          Requirements, Insurance
+                        </p>
+                        <p className="text-muted-foreground mb-1">
+                          <span className="font-medium text-foreground">Owner:</span> IT Security Lead
+                        </p>
+                        <p className="text-muted-foreground">
+                          <span className="font-medium text-foreground">Mitigation:</span> Third-party security audit,
+                          network segmentation, SOC monitoring
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Risk Heatmap Summary</CardTitle>
+                    <CardDescription>Visual overview of risk exposure across likelihood and impact</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="aspect-square border border-border rounded flex items-center justify-center bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Low/Low</span>
+                      </div>
+                      <div className="aspect-square border border-border rounded flex items-center justify-center bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Med/Low</span>
+                      </div>
+                      <div className="aspect-square border border-destructive/40 bg-destructive/10 rounded flex items-center justify-center">
+                        <span className="text-sm font-medium text-foreground">
+                          High/Low
+                          <br />1 risk
+                        </span>
+                      </div>
+                      <div className="aspect-square border border-border rounded flex items-center justify-center bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Low/Med</span>
+                      </div>
+                      <div className="aspect-square border border-border rounded flex items-center justify-center bg-muted/30">
+                        <span className="text-sm font-medium text-foreground">
+                          Med/Med
+                          <br />1 risk
+                        </span>
+                      </div>
+                      <div className="aspect-square border border-destructive/40 bg-destructive/10 rounded flex items-center justify-center">
+                        <span className="text-sm font-medium text-foreground">
+                          High/Med
+                          <br />1 risk
+                        </span>
+                      </div>
+                      <div className="aspect-square border border-border rounded flex items-center justify-center bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Low/High</span>
+                      </div>
+                      <div className="aspect-square border border-border rounded flex items-center justify-center bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Med/High</span>
+                      </div>
+                      <div className="aspect-square border-2 border-destructive bg-destructive/20 rounded flex items-center justify-center">
+                        <span className="text-sm font-semibold text-foreground">
+                          High/High
+                          <br />1 risk
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Diligence Tab */}
+              <TabsContent value="diligence" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Diligence Checklist</CardTitle>
+                    <CardDescription>Track completion of required due diligence activities</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="border border-border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-foreground">Technical Diligence</h4>
+                        <Badge variant="default" className="bg-green-600">
+                          Complete
+                        </Badge>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-foreground">System architecture review</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-foreground">Performance validation testing</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-foreground">Integration compatibility assessment</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-foreground">Vendor site visit completed</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-foreground">Financial Diligence</h4>
+                        <Badge variant="secondary">In Progress</Badge>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-foreground">Financial model validation</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-foreground">Vendor financial stability check</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Tax credit eligibility confirmation</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Financing terms negotiation</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-foreground">Cybersecurity Diligence</h4>
+                        <Badge variant="secondary">In Progress</Badge>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-foreground">NERC CIP compliance review</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Penetration testing scheduled</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Security audit artifacts pending</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-foreground">Regulatory & Interconnection</h4>
+                        <Badge variant="outline">Not Started</Badge>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>ISO interconnection application submitted</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Environmental permits identified</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Utility coordination initiated</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-foreground">Supply Chain & ESG</h4>
+                        <Badge variant="outline">Not Started</Badge>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Supply chain traceability audit</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>ESG scorecard from vendor</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="h-4 w-4 border-2 border-border rounded-full" />
+                          <span>Recycling/end-of-life plan review</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Artifacts & Documentation</CardTitle>
+                    <CardDescription>Uploaded files and supporting materials</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileCheck className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium text-foreground">Tesla_Megapack_Technical_Spec.pdf</p>
+                          <p className="text-xs text-muted-foreground">Uploaded 2 weeks ago</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        View
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileCheck className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium text-foreground">Financial_Model_v3.xlsx</p>
+                          <p className="text-xs text-muted-foreground">Uploaded 1 week ago</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        View
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileCheck className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium text-foreground">Site_Visit_Report.docx</p>
+                          <p className="text-xs text-muted-foreground">Uploaded 3 days ago</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        View
+                      </Button>
+                    </div>
+                    <Button variant="outline" className="w-full mt-4 bg-transparent">
+                      <Download className="h-4 w-4 mr-2" />
+                      Upload Additional Documents
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Decision Tab */}
+              <TabsContent value="decision" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Stage Gate Progression</CardTitle>
+                    <CardDescription>Track evaluation status through approval process</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-white font-semibold">
+                          ✓
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">Evaluation</h4>
+                          <p className="text-sm text-muted-foreground">Initial assessment and modeling completed</p>
+                        </div>
+                        <Badge variant="default" className="bg-green-600">
+                          Complete
+                        </Badge>
+                      </div>
+                      <div className="border-l-2 border-border h-8 ml-5" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                          2
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">Pilot</h4>
+                          <p className="text-sm text-muted-foreground">Current stage: Vendor negotiations underway</p>
+                        </div>
+                        <Badge variant="secondary">In Progress</Badge>
+                      </div>
+                      <div className="border-l-2 border-border h-8 ml-5" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-border bg-background text-muted-foreground font-semibold">
+                          3
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-muted-foreground">Deployment</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Full-scale implementation pending pilot results
+                          </p>
+                        </div>
+                        <Badge variant="outline">Pending</Badge>
+                      </div>
+                      <div className="border-l-2 border-border h-8 ml-5" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-border bg-background text-muted-foreground font-semibold">
+                          4
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-muted-foreground">Scale</h4>
+                          <p className="text-sm text-muted-foreground">Fleet deployment across service territory</p>
+                        </div>
+                        <Badge variant="outline">Pending</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Required Approvals</CardTitle>
+                    <CardDescription>Stakeholder sign-offs needed to proceed to deployment</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg bg-green-50 dark:bg-green-950/20">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium text-foreground">Finance Director</p>
+                          <p className="text-xs text-muted-foreground">Approved financial model & IRR</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground">Dec 15, 2024</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg bg-green-50 dark:bg-green-950/20">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium text-foreground">VP Engineering</p>
+                          <p className="text-xs text-muted-foreground">Approved technical specifications</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground">Dec 18, 2024</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border-2 border-primary rounded-lg bg-primary/5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-5 w-5 border-2 border-primary rounded-full" />
+                        <div>
+                          <p className="font-medium text-foreground">PMO Lead</p>
+                          <p className="text-xs text-muted-foreground">Pending review of project plan</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">Awaiting</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="h-5 w-5 border-2 border-border rounded-full" />
+                        <div>
+                          <p className="font-medium text-foreground">CIO</p>
+                          <p className="text-xs text-muted-foreground">Final executive sign-off</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline">Pending</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Investment Case Summary</CardTitle>
+                    <CardDescription>Executive recommendation and rationale</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 border-2 border-primary bg-primary/5 rounded-lg">
+                      <h4 className="font-bold text-foreground mb-2 text-lg">Recommendation: PROCEED TO PILOT</h4>
+                      <p className="text-sm text-foreground leading-relaxed">
+                        The Tesla Megapack 2XL battery storage system demonstrates strong financial returns (12.4% IRR,
+                        $8.2M NPV) and outperforms competing vendors on key technical and cost criteria. While supply
+                        chain and interconnection risks are present, they are manageable with identified mitigation
+                        strategies. The project aligns with our grid modernization strategy and delivers measurable
+                        capacity value. We recommend proceeding to pilot deployment with a 20 MW/80 MWh system to
+                        validate performance assumptions before full-scale rollout.
+                      </p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <h5 className="font-semibold text-foreground mb-2">Key Strengths</h5>
+                        <ul className="space-y-1 text-sm text-muted-foreground">
+                          <li>• Superior IRR vs alternatives (12.4%)</li>
+                          <li>• Best-in-class technical performance</li>
+                          <li>• Strong vendor track record</li>
+                          <li>• Clear ROI within 7-year payback</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-semibold text-foreground mb-2">Managed Risks</h5>
+                        <ul className="space-y-1 text-sm text-muted-foreground">
+                          <li>• Interconnection timeline buffers built in</li>
+                          <li>• Multiple supply chain options</li>
+                          <li>• Regulatory risk monitored actively</li>
+                          <li>• Cybersecurity controls in place</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                      <Button className="flex-1">
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Approve & Advance to Deployment
+                      </Button>
+                      <Button variant="outline" className="flex-1 bg-transparent">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export Investment Case PDF
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Right Rail - Assumptions Panel */}
+          <div className="w-80 space-y-4">
+            <Card className="sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-base">Assumptions Panel</CardTitle>
+                <CardDescription className="text-xs">Key model inputs (editable)</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div>
+                  <p className="font-medium text-foreground">Scenario</p>
+                  <select className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background text-foreground">
+                    <option>Base Case</option>
+                    <option>+10% CAPEX</option>
+                    <option>-5% Performance</option>
+                    <option>Tariff -15%</option>
+                  </select>
+                </div>
+                <div className="border-t border-border pt-3 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total CAPEX</span>
+                    <span className="font-medium text-foreground">$45.0M</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Annual OPEX</span>
+                    <span className="font-medium text-foreground">$850K</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">ITC (30%)</span>
+                    <span className="font-medium text-foreground">$13.5M</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Capacity Revenue</span>
+                    <span className="font-medium text-foreground">$6.2M/yr</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Discount Rate</span>
+                    <span className="font-medium text-foreground">8.5%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Project Life</span>
+                    <span className="font-medium text-foreground">20 years</span>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full mt-3 bg-transparent">
+                  <Settings className="h-3 w-3 mr-2" />
+                  Edit Assumptions
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Scenario
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Compare Scenarios
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export to Excel
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                  <Target className="h-4 w-4 mr-2" />
+                  View Portfolio
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

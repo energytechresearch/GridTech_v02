@@ -1,0 +1,6 @@
+UX & UI (MVP wireframe guidance)
+
+Header: Evaluation name, vendor/product, stage, theme tags.
+Tabs: Returns | TCO & Downside | Market Map | Risks | Diligence | Decision
+Right Rail: Assumptions panel (editable, versioned), scenario selector, export.
+Dashboards: Portfolio roll‑up with tiles (IRR bands), risk heatmap, comparator table.

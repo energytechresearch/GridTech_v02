@@ -1,0 +1,12 @@
+Create a new page using the same style. 
+
+Please review and reference the attached
+1.Evaluation Page Modules Specifications
+2. User Workflows Specifications
+3. UX & UI Specifications
+
+The page/feature will provide intelligence and transparency for “Investment-Grade” Vendors and Technology Evaluation Studies.
+
+Our objective is to provide more financial modeling, diligence coordination, market mapping, risk assessment. Instead of treating technology pilots as engineering initiatives, reframe them as capital investment opportunities.
+
+
